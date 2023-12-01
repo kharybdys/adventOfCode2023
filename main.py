@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 from pathlib import Path
+import re
 
 import puzzle1a
 import puzzle1b
@@ -12,12 +13,16 @@ SOLVERS = {"1a": puzzle1a.solve,
            "2b": puzzle2b.solve}
 
 # I intend to manually change this for every puzzle
-DEFAULT_PUZZLE = "1a"
+DEFAULT_PUZZLE = "1b"
+
+PUZZLE_NUMBER_PATTERN = re.compile(r"\d+")
 
 
 def load_input(puzzle: str) -> list[str]:
     data_dir = Path(__file__).parent / "data"
-    with open(data_dir / f"input{puzzle}.txt", "rt") as file:
+    puzzle_number = PUZZLE_NUMBER_PATTERN.match(puzzle)[0]
+
+    with open(data_dir / f"input{puzzle_number}.txt", "rt") as file:
         return [line.rstrip() for line in file]
 
 
