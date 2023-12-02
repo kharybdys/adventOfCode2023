@@ -17,7 +17,6 @@ class Draw:
         for draw in Draw.DRAW_SPLIT_PATTERN.split(line):
             cubes_by_color = {}
             for colored_cubes in Draw.COLOR_SPLIT_PATTERN.split(draw):
-                sep = r"\w+"
                 cubes, color = colored_cubes.split()
                 cubes_by_color[color] = int(cubes)
             result.append(Draw(cubes_by_color=cubes_by_color))
