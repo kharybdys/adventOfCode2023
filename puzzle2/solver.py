@@ -12,3 +12,6 @@ def solve_a(puzzle_input: list[str]) -> None:
 
 def solve_b(puzzle_input: list[str]) -> None:
     print(puzzle_input)
+    games = [Game.from_string(puzzle) for puzzle in puzzle_input]
+    solution = sum(map(lambda g: g.power_value(), games))
+    print(f"{solution=}")

@@ -1,5 +1,7 @@
 import re
 from dataclasses import dataclass
+from functools import reduce
+from operator import mul
 from typing import ClassVar, Self
 
 
@@ -30,7 +32,6 @@ class Draw:
         return True
 
 
-
 @dataclass
 class Game:
     id: int
@@ -47,3 +48,14 @@ class Game:
 
     def possible(self, sack: dict[str, int]) -> bool:
         return all(map(lambda d: d.possible(sack), self.draws))
+
+    def power_value(self) -> int:
+        return reduce(mul, self._minimum_sack().values())
+
+    def _minimum_sack(self) -> dict[str, int]:
+        sack = {}
+        for draw in self.draws:
+            for color, cubes in draw.cubes_by_color.items():
+                if cubes > sack.get(color, 0):
+                    sack[color] = cubes
+        return sack
