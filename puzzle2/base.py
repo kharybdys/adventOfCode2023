@@ -21,6 +21,15 @@ class Draw:
             result.append(Draw(cubes_by_color=cubes_by_color))
         return result
 
+    def possible(self, sack: dict[str, int]) -> bool:
+        for color, cubes in self.cubes_by_color.items():
+            if color not in sack:
+                return False
+            if cubes > sack[color]:
+                return False
+        return True
+
+
 
 @dataclass
 class Game:
@@ -35,3 +44,6 @@ class Game:
         return Game(id=int(match[1]),
                     draws=Draw.from_string(match[2])
                     )
+
+    def possible(self, sack: dict[str, int]) -> bool:
+        return all(map(lambda d: d.possible(sack), self.draws))
