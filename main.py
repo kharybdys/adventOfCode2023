@@ -4,13 +4,16 @@ import re
 
 import puzzle1a
 import puzzle1b
-import puzzle2a
-import puzzle2b
+import puzzle2
+import puzzle3
 
 SOLVERS = {"1a": puzzle1a.solve,
            "1b": puzzle1b.solve,
-           "2a": puzzle2a.solve,
-           "2b": puzzle2b.solve}
+           "2a": puzzle2.solve_a,
+           "2b": puzzle2.solve_b,
+           "3a": puzzle3.solve_a,
+           "3b": puzzle3.solve_b,
+           }
 
 # I intend to manually change this for every puzzle
 DEFAULT_PUZZLE = "1b"
