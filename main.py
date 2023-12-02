@@ -5,7 +5,9 @@ import re
 import puzzle1a
 import puzzle1b
 import puzzle2
+import puzzle2022_25
 import puzzle3
+import puzzle4
 
 SOLVERS = {"1a": puzzle1a.solve,
            "1b": puzzle1b.solve,
@@ -13,12 +15,16 @@ SOLVERS = {"1a": puzzle1a.solve,
            "2b": puzzle2.solve_b,
            "3a": puzzle3.solve_a,
            "3b": puzzle3.solve_b,
+           "4a": puzzle4.solve_a,
+           "4b": puzzle4.solve_b,
+           "2022_25a": puzzle2022_25.solve_a,
+           "2022_25b": puzzle2022_25.solve_b,
            }
 
 # I intend to manually change this for every puzzle
-DEFAULT_PUZZLE = "2b"
+DEFAULT_PUZZLE = "2022_25a"
 
-PUZZLE_NUMBER_PATTERN = re.compile(r"\d+")
+PUZZLE_NUMBER_PATTERN = re.compile(r"[\d_]+")
 
 
 def load_input(puzzle: str) -> list[str]:
