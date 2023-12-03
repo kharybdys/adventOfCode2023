@@ -55,11 +55,34 @@ class SeaFloor:
                             new_floor[y][x] = cucumber
         return moved
 
-    def move(self) -> bool:
-        new_floor: list[list[FloorStatus]] = [[FloorStatus.EMPTY] * len(self.floor[0]) for _ in range(len(self.floor))]
-        moved_east = self._move_only(floor=self.floor, new_floor=new_floor, restrict_to=FloorStatus.EAST)
-        moved_south = self._move_only(floor=self.floor, new_floor=new_floor, restrict_to=FloorStatus.SOUTH)
+    @staticmethod
+    def _keep(floor_element: FloorStatus,  restrict_to: FloorStatus) -> FloorStatus:
+        if floor_element == restrict_to:
+            return floor_element
+        else:
+            return FloorStatus.EMPTY
+
+    def _empty_but_keep(self, restrict_to: FloorStatus):
+        return [[self._keep(floor_element=self.status_at(x, y),
+                            restrict_to=restrict_to)
+                 for x, new_floor_element in enumerate(new_line)]
+                for y, new_line in enumerate(self.floor)]
+
+    def _move_east(self) -> bool:
+        new_floor: list[list[FloorStatus]] = self._empty_but_keep(restrict_to=FloorStatus.SOUTH)
+        moved = self._move_only(floor=self.floor, new_floor=new_floor, restrict_to=FloorStatus.EAST)
         self.floor = new_floor
+        return moved
+
+    def _move_south(self) -> bool:
+        new_floor: list[list[FloorStatus]] = self._empty_but_keep(restrict_to=FloorStatus.EAST)
+        moved = self._move_only(floor=self.floor, new_floor=new_floor, restrict_to=FloorStatus.SOUTH)
+        self.floor = new_floor
+        return moved
+
+    def move(self) -> bool:
+        moved_east = self._move_east()
+        moved_south = self._move_south()
         return moved_east or moved_south
 
     def print(self):
@@ -71,7 +94,7 @@ class SeaFloor:
         new_x, new_y = x, y
         if new_y >= len(self.floor):
             new_y -= len(self.floor)
-        line_length = len(self.floor[y])
+        line_length = len(self.floor[new_y])
         if new_x >= line_length:
             new_x -= line_length
         return new_x, new_y
@@ -80,3 +103,9 @@ class SeaFloor:
         if not floor:
             floor = self.floor
         return floor[y][x]
+
+    def __eq__(self, other):
+        if isinstance(other, SeaFloor):
+            return self.floor == other.floor
+        else:
+            return False
