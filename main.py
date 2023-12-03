@@ -22,7 +22,7 @@ SOLVERS = {"1a": puzzle1a.solve,
            }
 
 # I intend to manually change this for every puzzle
-DEFAULT_PUZZLE = "2022_25a"
+DEFAULT_PUZZLE = "3a"
 
 PUZZLE_NUMBER_PATTERN = re.compile(r"[\d_]+")
 
