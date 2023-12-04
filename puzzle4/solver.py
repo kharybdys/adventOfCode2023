@@ -1,4 +1,5 @@
 import re
+from collections import defaultdict
 from dataclasses import dataclass
 from typing import ClassVar, Self
 
@@ -44,3 +45,11 @@ def solve_a(puzzle_input: list[str]) -> None:
 
 def solve_b(puzzle_input: list[str]) -> None:
     print(puzzle_input)
+    cards = [Card.from_line(line) for line in puzzle_input]
+    card_count: dict[int, int] = defaultdict(lambda: 1)
+    for card in cards:
+        if wins := card.num_winning_cards():
+            for i in range(1, wins+1):
+                card_count[card.card_id+i] += card_count[card.card_id]
+    solution = sum(card_count[card.card_id] for card in cards)
+    print(solution)
