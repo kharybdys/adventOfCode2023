@@ -1,6 +1,9 @@
 from operator import floordiv, mul, mod, add
 from typing import Callable
 
+from puzzle2021_24.constraints import ConstraintsWatcher
+from puzzle2021_24.variable import Variable, SetPossibilitiesGenerator
+
 
 def analyze_instructions(instructions: list[str]) -> tuple[bool, bool, bool, bool]:
     """Returns whether w, x, y and z are used as inputs for this set of instructions (4x bool)"""
@@ -97,3 +100,43 @@ class PartialALU:
                     return int(a)
                 except:
                     raise ValueError(f"Invalid attribute {attrib}")
+
+
+class ReverseALU:
+    def __init__(self):
+        self.watcher = ConstraintsWatcher()
+        self.w = Variable(watcher=self.watcher)
+        self.x = Variable(watcher=self.watcher)
+        self.y = Variable(watcher=self.watcher)
+        self.z = Variable(watcher=self.watcher, possibilities=SetPossibilitiesGenerator([0]))
+        self.no_longer_referred_variables: list[Variable] = []
+
+    def parse_instruction(self, instruction: str) -> None:
+        instr_split = instruction.split()
+        if len(instr_split) == 3:
+            instr_type, param1, param2 = instr_split
+        else:
+            raise ValueError(f"Invalid instruction {instruction}")
+
+        match instr_type:
+            case "inp":
+                raise NotImplementedError("input not supported by this ALU")
+            case "add":
+                pass
+            case "mul":
+                pass
+            case "div":
+                pass
+            case "mod":
+                pass
+            case "eql":
+                pass
+            case _:
+                raise NotImplementedError(f"Unknown instruction {instruction}")
+
+    def execute_all(self, instructions: list[str]):
+        for instruction in instructions:
+            self.execute(instruction)
+
+    def execute(self, instruction: str):
+        instr_func, param1, param2, output = self.parse_instruction(instruction)

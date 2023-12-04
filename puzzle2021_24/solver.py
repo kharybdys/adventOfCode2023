@@ -76,7 +76,7 @@ def merge_solutions(old_solutions: dict[int, PartialSolution], new_solutions: di
     return result
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a_too_slow(puzzle_input: list[str]) -> None:
     print(puzzle_input)
     t0 = time.time()
     partial_solutions = {0: PartialSolution("", 0)}
@@ -91,5 +91,81 @@ def solve_a(puzzle_input: list[str]) -> None:
     print(f"Solution: {solution.partial_id}")
 
 
+def solve_a(puzzle_input: list[str]) -> None:
+    print(puzzle_input)
+
+
 def solve_b(puzzle_input: list[str]) -> None:
     print(puzzle_input)
+
+
+"""
+w
+x
+y
+z
+
+?, ?, ?, 0
+add z y
+?, ?, -a, a
+mul y x
+?, b, -a/b, a
+add y 13
+?, b, -a/b-13, a
+add y w
+c, b, -a/b-13-c, a
+mul y 0
+c, b, ?, a  en -a/b-13-c = 0
+mul z y
+c, b, d, a/d
+add y 1
+c, b, d-1, a/d
+mul y x
+c, b, (d-1)/b, a/d
+add y 25
+c, b, (d-1)/b-25, a/d
+mul y 0
+c, b, ?, a/d en (d-1)/b-25 = 0  -> 25 = (d-1)/b -> 25b = d-1 -> 25b + 1 = d
+eql x 0
+c, e, ?, a/d en b in (0, 1) met e == 0 <=> b == 1
+eql x w
+f, e, ?, a/d en c in (0, 1) met f == e <=> c == 1
+add x -14
+f, e-14, ?, a/d
+div z 26
+f, e-14, ?, 26a/d+g met g in [0, 25]
+mod x 26
+f, 26h+e-14, ?, 26a/d+g
+add x z
+f, 26h+e-14 - (26a/d+g), ?, 26a/d+g
+mul x 0
+f, ?, ?, 26a/d+g met 26h+e-14 - (26a/d+g) = 0
+inp w
+
+-a/b-13-c = 0 -> a = -b(13+c)
+25b + 1 = d
+b in [0, 1] met e == 0 <=> b == 1
+c in [0, 1] met f == e <=> c == 1
+g in [0, 25]
+26h+e-14 - (26a/d+g) = 0
+
+solve a, given f in [1,9]
+-a/b-13 = c
+25b+1 = d -> d in {1, 26}
+b in [0, 1]
+c in [0, 1] -> -a/b = 13 of 14 -> a = -13b of a = -14b -> a in {0, -13, -14}
+g in [0, 25]
+26h+e-14 = 26a/d+g
+
+b == 0, c == 0 -> a == 0,   d == 1,  e != 0, f == 0, g in [0, 25]   -- kan niet want f != 0
+b == 0, c == 1 -> a == 0,   d == 1,  e != 0, f == e, g in [0, 25], f in [1, 9]
+  26a/d+14 = 14
+  14+g = 26h+e
+b == 1, c == 0 -> a == -13, d == 26, e == 0, f != 0, g in [0, 25], f in [1, 9]
+  26a/d+14 = 1
+  1+g = 26h+e
+  [1, 26] = 26h
+b == 1, c == 1 -> a == -14, d == 26, e == 0, f == 0, g in [0, 25]   -- kan niet want f != 0
+
+Oplossing zou moeten zijn w = 9, z = 23
+"""

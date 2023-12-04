@@ -3,7 +3,6 @@ import re
 from pathlib import Path
 from typing import Generator
 
-from main import load_input
 from puzzle2021_25.sea_floor import SeaFloor
 
 
@@ -48,7 +47,3 @@ def solve_a(puzzle_input: list[str]) -> None:
 
 def solve_b(puzzle_input: list[str]) -> None:
     print(puzzle_input)
-
-
-if __name__ == "__main__":
-    solve_a(load_input("2021_25a"))
