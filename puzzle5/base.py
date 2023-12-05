@@ -1,6 +1,8 @@
 import re
+from abc import abstractmethod, ABC
 
 from dataclasses import dataclass
+from itertools import batched
 from typing import Self, Generator
 
 
@@ -52,12 +54,12 @@ class Converter:
         return Converter(src=src, dest=dest, ranges=ranges)
 
 
-class Problem:
+class Problem(ABC):
     SEEDS_PREFIX = "seeds: "
     CONVERTER_PATTERN = re.compile(r"(\w+)-to-(\w+) map:")
 
-    def __init__(self, seeds: list[int], converters: list[Converter]):
-        self.seeds = seeds
+    def __init__(self, seeds_line: str, converters: list[Converter]):
+        self.seeds_line = seeds_line
         self.converters = list(self.special_sort(converters, "seed", "location"))
 
     @staticmethod
@@ -78,7 +80,7 @@ class Problem:
         return result
 
     def solve(self) -> int:
-        return min(self.convert(seed) for seed in self.seeds)
+        return min(self.convert(seed) for seed in self.generate_seeds())
 
     @staticmethod
     def split_on_empty_line(lines: list[str]) -> Generator[list[str], None, None]:
@@ -91,17 +93,33 @@ class Problem:
                 result = []
         yield result
 
-    @staticmethod
-    def from_string(lines: list[str]) -> Self:
-        seeds = []
+    @abstractmethod
+    def generate_seeds(self) -> Generator[int, None, None]:
+        pass
+
+    @classmethod
+    def from_string(cls, lines: list[str]) -> Self:
+        seeds_line = ""
         converters = []
         for block in Problem.split_on_empty_line(lines):
             if block[0].startswith(Problem.SEEDS_PREFIX):
-                seeds = [int(seed) for seed in block[0].removeprefix(Problem.SEEDS_PREFIX).split()]
+                seeds_line = block[0].removeprefix(Problem.SEEDS_PREFIX)
             else:
                 if match := Problem.CONVERTER_PATTERN.fullmatch(block[0]):
                     src, dest = match[1], match[2]
                     converters.append(Converter.from_string(block[1:], src, dest))
                 else:
                     raise ValueError(f"Invalid start to converter block: {block}")
-        return Problem(seeds=seeds, converters=converters)
+        return cls(seeds_line=seeds_line, converters=converters)
+
+
+class ProblemA(Problem):
+    def generate_seeds(self) -> Generator[int, None, None]:
+        for seed in self.seeds_line.split():
+            yield int(seed)
+
+
+class ProblemB(Problem):
+    def generate_seeds(self) -> Generator[int, None, None]:
+        for start, range_size in batched(map(int, self.seeds_line.split()), 2):
+            yield from range(start, start+range_size)

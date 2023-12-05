@@ -34,7 +34,7 @@ SOLVERS = {"1a": puzzle1a.solve,
            }
 
 # I intend to manually change this for every puzzle
-DEFAULT_PUZZLE = "5a"
+DEFAULT_PUZZLE = "5b"
 
 PUZZLE_NUMBER_PATTERN = re.compile(r"[\d_]+")
 
