@@ -6,20 +6,24 @@ from itertools import batched
 from typing import Self, Generator
 
 
-@dataclass
+@dataclass(order=True)
 class Range:
     start: int
     stop: int  # Exclusive
-    correction: int
+    correction: int = 0
 
-    def convert(self, num: int) -> int:
-        if self.valid_for(num):
-            return num + self.correction
-        else:
-            raise ValueError("Invalid range applied")
+    def partial_overlap(self, rng: Self) -> bool:
+        return rng.start < self.stop and self.start <= rng.stop
 
-    def valid_for(self, num: int) -> bool:
-        return self.start <= num < self.stop
+    def apply_ranges(self, ranges: list[Self]) -> Generator[Self, None, None]:
+        local_start = self.start
+        for rng in sorted(filter(self.partial_overlap, ranges)):
+            if rng.start > local_start:
+                yield Range(start=local_start, stop=rng.start)
+            yield Range(start=max(rng.start, self.start) + rng.correction, stop=min(rng.stop, self.stop) + rng.correction)
+            local_start = rng.stop
+        if local_start < self.stop:
+            yield Range(start=local_start, stop=self.stop)
 
     def __repr__(self):
         return f"Range[{self.start=}, {self.stop=}, {self.correction=}]"
@@ -38,11 +42,11 @@ class Converter:
         self.dest = dest
         self.ranges = ranges
 
-    def convert(self, num: int) -> int:
-        for single_range in self.ranges:
-            if single_range.valid_for(num):
-                return single_range.convert(num)
-        return num
+    def convert(self, ranges: list[Range]) -> list[Range]:
+        result = []
+        for rng in ranges:
+            result.extend(rng.apply_ranges(self.ranges))
+        return result
 
     def __repr__(self):
         return f"Converter[{self.src=}, {self.dest=}, # ranges {len(self.ranges)}]"
@@ -50,7 +54,6 @@ class Converter:
     @staticmethod
     def from_string(lines: list[str], src: str, dest: str) -> Self:
         ranges = [Range.from_string(line) for line in lines]
-        print(f"Making converter with ranges: {ranges}, for {src=} and {dest=}")
         return Converter(src=src, dest=dest, ranges=ranges)
 
 
@@ -64,23 +67,23 @@ class Problem(ABC):
 
     @staticmethod
     def special_sort(converters: list[Converter], src: str, dest: str) -> Generator[Converter, None, None]:
-        print(f"Called special_sort with {converters=}, {src=}, {dest=}")
         while src != dest:
             converter = next(filter(lambda c: c.src == src, converters))
-            print(f"Found converter {converter}")
             yield converter
             src = converter.dest
 
-    def convert(self, num: int) -> int:
-        result = num
-        print(f"Entered convert with {result}")
+    def convert(self, rng: Range) -> list[Range]:
+        result = [rng]
         for converter in self.converters:
             result = converter.convert(result)
-            print(f"After converter {converter} this is now {result}")
         return result
 
     def solve(self) -> int:
-        return min(self.convert(seed) for seed in self.generate_seeds())
+        ranges = []
+        for seed_range in self.generate_seeds():
+            ranges.extend(self.convert(seed_range))
+        min_range = min(ranges)
+        return min_range.start
 
     @staticmethod
     def split_on_empty_line(lines: list[str]) -> Generator[list[str], None, None]:
@@ -94,7 +97,7 @@ class Problem(ABC):
         yield result
 
     @abstractmethod
-    def generate_seeds(self) -> Generator[int, None, None]:
+    def generate_seeds(self) -> Generator[Range, None, None]:
         pass
 
     @classmethod
@@ -114,12 +117,13 @@ class Problem(ABC):
 
 
 class ProblemA(Problem):
-    def generate_seeds(self) -> Generator[int, None, None]:
-        for seed in self.seeds_line.split():
-            yield int(seed)
+    def generate_seeds(self) -> Generator[Range, None, None]:
+        for seed_str in self.seeds_line.split():
+            seed = int(seed_str)
+            yield Range(seed, seed + 1, 0)
 
 
 class ProblemB(Problem):
-    def generate_seeds(self) -> Generator[int, None, None]:
+    def generate_seeds(self) -> Generator[Range, None, None]:
         for start, range_size in batched(map(int, self.seeds_line.split()), 2):
-            yield from range(start, start+range_size)
+            yield Range(start, start + range_size, 0)

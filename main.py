@@ -35,6 +35,7 @@ SOLVERS = {"1a": puzzle1a.solve,
 
 # I intend to manually change this for every puzzle
 DEFAULT_PUZZLE = "5b"
+EXAMPLE = False
 
 PUZZLE_NUMBER_PATTERN = re.compile(r"[\d_]+")
 
@@ -43,7 +44,8 @@ def load_input(puzzle: str) -> list[str]:
     data_dir = Path(__file__).parent / "data"
     puzzle_number = PUZZLE_NUMBER_PATTERN.match(puzzle)[0]
 
-    with open(data_dir / f"input{puzzle_number}.txt", "rt") as file:
+    example_postfix = "_example" if EXAMPLE else ""
+    with open(data_dir / f"input{puzzle_number}{example_postfix}.txt", "rt") as file:
         return [line.rstrip() for line in file]
 
 
