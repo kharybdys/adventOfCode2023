@@ -1,4 +1,5 @@
 import time
+import datetime
 
 from dataclasses import dataclass
 from typing import Generator, Self
@@ -36,7 +37,7 @@ def split_to_instruction_sets(puzzle_input: list[str]) -> Generator[list[str], N
 
 
 def generate_partial_alus() -> Generator[PartialALU, None, None]:
-    MIN_Z = -1000000
+    MIN_Z = -1000000  # 1M, expected runtime for one block = 8 minutes. No valid solution remaining after block 6 of 14
     MAX_Z = +1000000
     for w in range(1, 10):
         for z in range(MIN_Z, MAX_Z+1):
@@ -79,11 +80,13 @@ def merge_solutions(old_solutions: dict[int, PartialSolution], new_solutions: di
 def solve_a_too_slow(puzzle_input: list[str]) -> None:
     print(puzzle_input)
     t0 = time.time()
+    print(f"Started at {datetime.datetime.now()}")
     partial_solutions = {0: PartialSolution("", 0)}
     for index, instruction_set in enumerate(reversed(list(split_to_instruction_sets(puzzle_input)))):
         new_solutions = solution_step(instruction_set)
         print(f"Processed instruction_set {index + 1}, got {len(new_solutions)} new solutions, time: {time.time() - t0}")
         partial_solutions = merge_solutions(partial_solutions, new_solutions)
+        print(f"At {datetime.datetime.now()}:")
         print(f"Processed instruction_set {index + 1}, got {len(partial_solutions)} merged solutions, time: {time.time() - t0}")
         if not partial_solutions:
             raise ValueError("Increase MIN_Z/MAX_Z, no solutions to be found like this!")
@@ -167,5 +170,43 @@ b == 1, c == 0 -> a == -13, d == 26, e == 0, f != 0, g in [0, 25], f in [1, 9]
   [1, 26] = 26h
 b == 1, c == 1 -> a == -14, d == 26, e == 0, f == 0, g in [0, 25]   -- kan niet want f != 0
 
-Oplossing zou moeten zijn w = 9, z = 23
+"""
+"""
+Oplossing zou moeten zijn w = 9, z = 23:
+
+w = 9, x = ?, y = ?, z = 23
+mul x 0
+w = 9, x = 0, y = ?, z = 23
+add x z
+w = 9, x = 23, y = ?, z = 23
+mod x 26
+w = 9, x = 23, y = ?, z = 23
+div z 26
+w = 9, x = 23, y = ?, z = 0
+add x -14
+w = 9, x = 9, y = ?, z = 0
+eql x w
+w = 9, x = 1, y = ?, z = 0
+eql x 0
+w = 9, x = 0, y = ?, z = 0
+mul y 0
+w = 9, x = 0, y = 0, z = 0
+add y 25
+w = 9, x = 0, y = 25, z = 0
+mul y x
+w = 9, x = 0, y = 0, z = 0
+add y 1
+w = 9, x = 0, y = 1, z = 0
+mul z y
+w = 9, x = 0, y = 1, z = 0
+mul y 0
+w = 9, x = 0, y = 0, z = 0
+add y w
+w = 9, x = 0, y = 0, z = 0
+add y 13
+w = 9, x = 0, y = 13, z = 0
+mul y x
+w = 9, x = 0, y = 0, z = 0
+add z y
+w = 9, x = 0, y = 0, z = 0
 """
