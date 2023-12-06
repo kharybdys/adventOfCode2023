@@ -53,6 +53,20 @@ def parse(puzzle_input: list[str]) -> list[tuple[int, int]]:
     return list(zip(times, distances))
 
 
+def parse_ignore_spaces(puzzle_input: list[str]) -> tuple[int, int]:
+    """list of time, distance pairs"""
+    times_prefix = "Time:"
+    distances_prefix = "Distance:"
+    time: int = 0
+    distance: int = 0
+    for line in puzzle_input:
+        if line.startswith(times_prefix):
+            time = int(line.removeprefix(times_prefix).replace(" ", ""))
+        if line.startswith(distances_prefix):
+            distance = int(line.removeprefix(distances_prefix).replace(" ", ""))
+    return time, distance
+
+
 def solve_a(puzzle_input: list[str]) -> None:
     print(puzzle_input)
     solution = prod(ways_to_win_with_log(time, distance) for time, distance in parse(puzzle_input))
@@ -64,3 +78,5 @@ def solve_a(puzzle_input: list[str]) -> None:
 
 def solve_b(puzzle_input: list[str]) -> None:
     print(puzzle_input)
+    solution = ways_to_win_with_log(*parse_ignore_spaces(puzzle_input))
+    print(solution)
