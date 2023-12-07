@@ -6,18 +6,18 @@ from puzzle2022_11.monkey import Monkey, ThrowTest
 from puzzle2022_11.operation import parse_operation
 
 
-def parse_puzzle_lines(puzzle_lines: list[str], logger: LogStreamer) -> dict[int, Monkey]:
+def parse_puzzle_lines(puzzle_lines: list[str], logger: LogStreamer, monkey_cls: type) -> dict[int, Monkey]:
     result = {}
     lines_iterator = iter(puzzle_lines)
     while True:
-        monkey = parse_monkey(lines_iterator, logger)
+        monkey = parse_monkey(lines_iterator, logger, monkey_cls)
         if monkey:
             result[monkey.monkey_id] = monkey
         else:
             return result
 
 
-def parse_monkey(lines_iterator: Iterator[str], logger: LogStreamer) -> Optional[Monkey]:
+def parse_monkey(lines_iterator: Iterator[str], logger: LogStreamer, monkey_cls: type) -> Optional[Monkey]:
     MONKEY_PATTERN = re.compile(r"Monkey (\d+):")
     STARTING_ITEMS_PREFIX = "  Starting items: "
     OPERATION_PREFIX = "  Operation: "
@@ -40,6 +40,6 @@ def parse_monkey(lines_iterator: Iterator[str], logger: LogStreamer) -> Optional
             else:
                 raise ValueError(f"Invalid input for Monkey, {lines=}")
     if monkey_id >= 0 and items and operation and test:
-        return Monkey(monkey_id=monkey_id, items=items, throw_test=test, operation=operation, logger=logger)
+        return monkey_cls(monkey_id=monkey_id, items=items, throw_test=test, operation=operation, logger=logger)
     else:
         return None

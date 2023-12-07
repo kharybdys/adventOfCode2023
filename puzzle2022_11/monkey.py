@@ -25,6 +25,8 @@ class ThrowTest:
 
 
 class Monkey:
+    RELIEF_FACTOR: int = 3
+
     def __init__(self, monkey_id: int, items: list[int], operation: Operation, throw_test: ThrowTest, logger: LogStreamer):
         self.monkey_id = monkey_id
         self.items = items
@@ -36,6 +38,9 @@ class Monkey:
 
     def report_items(self):
         self.logger.log(f"Monkey {self.monkey_id}: " + ", ".join(map(str, self.items)))
+
+    def report_inspections(self):
+        self.logger.log(f"Monkey {self.monkey_id} inspected items {self.items_inspected} times.")
 
     def register_monkeys(self, monkeys: dict[int, Self]):
         self.monkeys = monkeys
@@ -53,10 +58,14 @@ class Monkey:
             self.log(detail_log, f"Monkey inspects an item with a worry level of {item}.")
             self.items_inspected += 1
             item = self.operation.apply(item, detail_log)
-            item = item // 3
+            item = item // self.RELIEF_FACTOR
             self.log(detail_log, f"Monkey gets bored with item. Worry level is divided by 3 to {item}.")
             target_monkey = self.throw_test.throws_to_monkey(item, detail_log)
             self.log(detail_log, f"Item with worry level {item} is thrown to monkey {target_monkey}.")
             self.monkeys[target_monkey].add(item)
         # All items will have been thrown to some other monkey
         self.items = []
+
+
+class WorrisomeMonkey(Monkey):
+    RELIEF_FACTOR: int = 1
