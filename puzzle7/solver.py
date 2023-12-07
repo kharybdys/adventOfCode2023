@@ -26,30 +26,86 @@ class Hand:
     A_chr: ClassVar[str] = chr(ord("9") + 5)
 
     def __repr__(self):
-        orig_cards = self.cards.replace(self.A_chr, "A").replace(self.K_chr, "K").replace(self.Q_chr, "Q").replace(self.J_chr, "J").replace(self.T_chr, "T")
-        return f"Hand[type={self.hand_type}, cards={orig_cards}, bid={self.bid}]"
+        return f"Hand[type={self.hand_type}, cards={self.to_repr(self.cards)}, bid={self.bid}]"
 
-    @staticmethod
-    def from_string(line: str) -> Self:
-        orig_cards, bid_str = line.split()
-        cards_count = Counter(orig_cards)
-        print(f"{cards_count=}, {line=}, {list(sorted(cards_count.values()))=}")
+    @classmethod
+    def to_repr(cls, cards: str) -> str:
+        return cards.replace(cls.A_chr, "A").replace(cls.K_chr, "K").replace(cls.Q_chr, "Q").replace(cls.J_chr, "J").replace(cls.T_chr, "T")
+
+    @classmethod
+    def to_hand_type(cls, cards: str) -> HandType:
+        cards_count = Counter(cards)
+        print(f"{cards_count=}, {cards=}, {list(sorted(cards_count.values()))=}")
         if 5 in cards_count.values():
-            hand_type = HandType.FIVE_OF_A_KIND
+            return HandType.FIVE_OF_A_KIND
         elif 4 in cards_count.values():
-            hand_type = HandType.FOUR_OF_A_KIND
+            return HandType.FOUR_OF_A_KIND
         elif 3 in cards_count.values() and 2 in cards_count.values():
-            hand_type = HandType.FULL_HOUSE
+            return HandType.FULL_HOUSE
         elif 3 in cards_count.values():
-            hand_type = HandType.THREE_OF_A_KIND
+            return HandType.THREE_OF_A_KIND
         elif [1, 2, 2] == list(sorted(cards_count.values())):
-            hand_type = HandType.DOUBLE_PAIR
+            return HandType.DOUBLE_PAIR
         elif 2 in cards_count.values():
-            hand_type = HandType.PAIR
+            return HandType.PAIR
         else:
-            hand_type = HandType.SINGLE_CARD
-        cards = orig_cards.replace("T", Hand.T_chr).replace("J", Hand.J_chr).replace("Q", Hand.Q_chr).replace("K", Hand.K_chr).replace("A", Hand.A_chr)
+            return HandType.SINGLE_CARD
+
+    @classmethod
+    def from_string(cls, line: str) -> Self:
+        orig_cards, bid_str = line.split()
+        hand_type = cls.to_hand_type(orig_cards)
+        cards = orig_cards.replace("T", cls.T_chr).replace("J", cls.J_chr).replace("Q", cls.Q_chr).replace("K", cls.K_chr).replace("A", cls.A_chr)
         return Hand(hand_type=hand_type, cards=cards, bid=int(bid_str))
+
+
+class JokerHand(Hand):
+    J_chr: ClassVar[str] = chr(ord("1") - 2)
+
+    @classmethod
+    def to_hand_type(cls, cards: str) -> HandType:
+        cards_count = Counter(cards)
+        joker_count = cards_count.get("J", 0)
+        del cards_count["J"]
+        sorted_values = sorted(cards_count.values(), reverse=True)
+        highest_value = sorted_values[0] if sorted_values else 0
+        match highest_value:
+            case 5:
+                return HandType.FIVE_OF_A_KIND
+            case 4 if joker_count == 1:
+                return HandType.FIVE_OF_A_KIND
+            case 4:
+                return HandType.FOUR_OF_A_KIND
+            case 3 if joker_count == 2:
+                return HandType.FIVE_OF_A_KIND
+            case 3 if joker_count == 1:
+                return HandType.FOUR_OF_A_KIND
+            case 3:
+                return HandType.THREE_OF_A_KIND
+            case 2 if joker_count == 3:
+                return HandType.FIVE_OF_A_KIND
+            case 2 if joker_count == 2:
+                return HandType.FOUR_OF_A_KIND
+            case 2 if joker_count == 1 and sorted_values[1] == 2:
+                return HandType.FULL_HOUSE
+            case 2 if joker_count == 1:
+                return HandType.THREE_OF_A_KIND
+            case 2 if sorted_values[1] == 2:
+                return HandType.DOUBLE_PAIR
+            case 2:
+                return HandType.PAIR
+            case 1 if joker_count == 4:
+                return HandType.FIVE_OF_A_KIND
+            case 1 if joker_count == 3:
+                return HandType.FOUR_OF_A_KIND
+            case 1 if joker_count == 2:
+                return HandType.THREE_OF_A_KIND
+            case 1 if joker_count == 1:
+                return HandType.PAIR
+            case 1:
+                return HandType.SINGLE_CARD
+            case 0 if joker_count == 5:
+                return HandType.FIVE_OF_A_KIND
 
 
 def solve_a(puzzle_input: list[str]) -> None:
@@ -63,3 +119,8 @@ def solve_a(puzzle_input: list[str]) -> None:
 
 def solve_b(puzzle_input: list[str]) -> None:
     print(puzzle_input)
+    solution = 0
+    for i, hand in enumerate(sorted([JokerHand.from_string(line) for line in puzzle_input]), start=1):
+        print(f"Hand {i} = {hand} ")
+        solution += i * hand.bid
+    print(solution)
