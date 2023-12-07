@@ -26,11 +26,11 @@ class Hand:
     A_chr: ClassVar[str] = chr(ord("9") + 5)
 
     def __repr__(self):
-        return f"Hand[type={self.hand_type}, cards={self.to_repr(self.cards)}, bid={self.bid}]"
+        return f"Hand[type={self.hand_type}, cards={self.cards_repr}, bid={self.bid}]"
 
-    @classmethod
-    def to_repr(cls, cards: str) -> str:
-        return cards.replace(cls.A_chr, "A").replace(cls.K_chr, "K").replace(cls.Q_chr, "Q").replace(cls.J_chr, "J").replace(cls.T_chr, "T")
+    @property
+    def cards_repr(self) -> str:
+        return self.cards.replace(self.A_chr, "A").replace(self.K_chr, "K").replace(self.Q_chr, "Q").replace(self.J_chr, "J").replace(self.T_chr, "T")
 
     @classmethod
     def to_hand_type(cls, cards: str) -> HandType:
@@ -56,7 +56,8 @@ class Hand:
         orig_cards, bid_str = line.split()
         hand_type = cls.to_hand_type(orig_cards)
         cards = orig_cards.replace("T", cls.T_chr).replace("J", cls.J_chr).replace("Q", cls.Q_chr).replace("K", cls.K_chr).replace("A", cls.A_chr)
-        return Hand(hand_type=hand_type, cards=cards, bid=int(bid_str))
+        print(f"{line=}, {hand_type.name=}")
+        return cls(hand_type=hand_type, cards=cards, bid=int(bid_str))
 
 
 class JokerHand(Hand):
@@ -69,6 +70,7 @@ class JokerHand(Hand):
         del cards_count["J"]
         sorted_values = sorted(cards_count.values(), reverse=True)
         highest_value = sorted_values[0] if sorted_values else 0
+        print(f"{cards=}, {highest_value=}, {sorted_values=}, {joker_count=}")
         match highest_value:
             case 5:
                 return HandType.FIVE_OF_A_KIND
@@ -80,6 +82,8 @@ class JokerHand(Hand):
                 return HandType.FIVE_OF_A_KIND
             case 3 if joker_count == 1:
                 return HandType.FOUR_OF_A_KIND
+            case 3 if sorted_values[1] == 2:
+                return HandType.FULL_HOUSE
             case 3:
                 return HandType.THREE_OF_A_KIND
             case 2 if joker_count == 3:
