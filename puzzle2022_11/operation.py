@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Self
 
 from puzzle2022_11.logger import LogStreamer
-from puzzle2022_11.prime_factorization_number import PrimeFactorizationNumber
+from puzzle2022_11.number import ANumber
 
 
 class Operation(ABC):
@@ -12,11 +12,11 @@ class Operation(ABC):
         self.logger = logger
 
     @abstractmethod
-    def apply(self, num: PrimeFactorizationNumber, detail_log: bool) -> PrimeFactorizationNumber:
+    def apply(self, num: ANumber, detail_log: bool) -> ANumber:
         pass
 
     @abstractmethod
-    def log(self, result: PrimeFactorizationNumber, do_log: bool):
+    def log(self, result: ANumber, do_log: bool):
         pass
 
     @classmethod
@@ -32,12 +32,12 @@ class AddOperation(Operation):
         super().__init__(logger)
         self.constant = constant
 
-    def apply(self, num: PrimeFactorizationNumber, detail_log: bool) -> PrimeFactorizationNumber:
+    def apply(self, num: ANumber, detail_log: bool) -> ANumber:
         result = num + self.constant
         self.log(result=result, do_log=detail_log)
         return result
 
-    def log(self, result: int, do_log: bool):
+    def log(self, result: ANumber, do_log: bool):
         if do_log:
             self.logger.log("Worry level increases by # to |.".replace("#", str(self.constant)).replace("|", str(result)))
 
@@ -53,12 +53,12 @@ class MultiplyOperation(Operation):
         super().__init__(logger)
         self.constant = constant
 
-    def apply(self, num: PrimeFactorizationNumber, detail_log: bool) -> PrimeFactorizationNumber:
+    def apply(self, num: ANumber, detail_log: bool) -> ANumber:
         result = num*self.constant
         self.log(result=result, do_log=detail_log)
         return result
 
-    def log(self, result: PrimeFactorizationNumber, do_log: bool):
+    def log(self, result: ANumber, do_log: bool):
         if do_log:
             self.logger.log("Worry level is multiplied by # to |.".replace("#", str(self.constant)).replace("|", str(result)))
 
@@ -70,12 +70,12 @@ class MultiplyOperation(Operation):
 class SquareOperation(Operation):
     PATTERN = re.compile(r"new = old \* old")
 
-    def apply(self, num: PrimeFactorizationNumber, detail_log: bool) -> PrimeFactorizationNumber:
+    def apply(self, num: ANumber, detail_log: bool) -> ANumber:
         result = num * num
         self.log(result=result, do_log=detail_log)
         return result
 
-    def log(self, result: PrimeFactorizationNumber, do_log: bool):
+    def log(self, result: ANumber, do_log: bool):
         if do_log:
             self.logger.log("Worry level is multiplied by itself to |.".replace("|", str(result)))
 

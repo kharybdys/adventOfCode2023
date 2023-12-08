@@ -1,6 +1,8 @@
 from typing import Self
 
 from puzzle2022_11.logger import LogStreamer
+from puzzle2022_11.modulo_number import ModuloNumber
+from puzzle2022_11.number import ANumber
 from puzzle2022_11.operation import Operation
 from puzzle2022_11.prime_factorization_number import PrimeFactorizationNumber
 
@@ -14,7 +16,7 @@ class ThrowTest:
                                          False: to_monkey_id_on_false}
         self.logger = logger
 
-    def throws_to_monkey(self, num: PrimeFactorizationNumber, detail_log: bool) -> int:
+    def throws_to_monkey(self, num: ANumber, detail_log: bool) -> int:
         test_result = num % self.test_divisor == 0
         if detail_log:
             self.logger.log(self.log_text(test_result))
@@ -28,9 +30,9 @@ class ThrowTest:
 class Monkey:
     RELIEF_FACTOR: int = 3
 
-    def __init__(self, monkey_id: int, items: list[PrimeFactorizationNumber], operation: Operation, throw_test: ThrowTest, logger: LogStreamer):
+    def __init__(self, monkey_id: int, items: list[ANumber], operation: Operation, throw_test: ThrowTest, logger: LogStreamer):
         self.monkey_id = monkey_id
-        self.items = items
+        self.items: list[ANumber] = items
         self.operation = operation
         self.throw_test = throw_test
         self.logger = logger
@@ -46,7 +48,14 @@ class Monkey:
     def register_monkeys(self, monkeys: dict[int, Self]):
         self.monkeys = monkeys
 
-    def add(self, item: PrimeFactorizationNumber):
+    def register_limit(self, limit: int):
+        if limit:
+            self.items = [ModuloNumber(int(item), limit) for item in self.items]
+        else:
+            # Unneeded but fun
+            self.items = [PrimeFactorizationNumber.from_int(int(item)) for item in self.items]
+
+    def add(self, item: ANumber):
         self.items.append(item)
 
     def log(self, do_log: bool, message: str):

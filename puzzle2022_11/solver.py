@@ -1,3 +1,4 @@
+from math import prod
 from pathlib import Path
 
 from puzzle2022_11.logger import LogStreamer
@@ -44,8 +45,11 @@ def solve_b(puzzle_input: list[str]) -> None:
     log_at = [1, 20, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
     logger = LogStreamer()
     monkeys: dict[int, Monkey] = parse_puzzle_lines(puzzle_input, logger, WorrisomeMonkey)
+    limit = prod(monkey.throw_test.test_divisor for monkey in monkeys.values())
     for monkey in monkeys.values():
         monkey.register_monkeys(monkeys)
+        monkey.register_limit(limit)
+
     print(f"Preparation done, monkeys are: {monkeys}")
 
     for i in range(1, 10001):

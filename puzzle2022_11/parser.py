@@ -4,7 +4,6 @@ from typing import Iterator, Optional
 from puzzle2022_11.logger import LogStreamer
 from puzzle2022_11.monkey import Monkey, ThrowTest
 from puzzle2022_11.operation import parse_operation
-from puzzle2022_11.prime_factorization_number import PrimeFactorizationNumber
 
 
 def parse_puzzle_lines(puzzle_lines: list[str], logger: LogStreamer, monkey_cls: type) -> dict[int, Monkey]:
@@ -31,7 +30,7 @@ def parse_monkey(lines_iterator: Iterator[str], logger: LogStreamer, monkey_cls:
         if match := MONKEY_PATTERN.fullmatch(line):
             monkey_id = int(match[1])
         elif line.startswith(STARTING_ITEMS_PREFIX):
-            items = list(map(PrimeFactorizationNumber.from_str, [item.strip() for item in line.removeprefix(STARTING_ITEMS_PREFIX).split(",")]))
+            items = list(map(int, [item.strip() for item in line.removeprefix(STARTING_ITEMS_PREFIX).split(",")]))
         elif line.startswith(OPERATION_PREFIX):
             operation = parse_operation(line.removeprefix(OPERATION_PREFIX), logger)
         else:
