@@ -44,12 +44,12 @@ def generate_self_cycles(node: AnalyzedNode, nodes_dict: [str, AnalyzedNode]) ->
         current_node = nodes_sofar[-1]
         node_left = nodes_dict[current_node.left]
         if node_left not in nodes_sofar:
-            current_paths.append(Path(partial_instr + "L", nodes_sofar + node_left))
+            current_paths.append(Path(partial_instr + "L", nodes_sofar + [node_left]))
         elif node_left == node:
             yield partial_instr + "L"
         node_right = nodes_dict[current_node.left]
         if node_right not in nodes_sofar:
-            current_paths.append(Path(partial_instr + "R", nodes_sofar + node_right))
+            current_paths.append(Path(partial_instr + "R", nodes_sofar + [node_right]))
         elif node_right == node:
             yield partial_instr + "R"
 
@@ -73,14 +73,14 @@ def generate_paths(node: AnalyzedNode, nodes_dict: [str, AnalyzedNode]) -> Gener
                 yield node_left.src, instruction + "L"
         elif node_left not in nodes_sofar:
             for instruction in partial_instructions:
-                current_paths.append(Path(instruction + "L", nodes_sofar + node_left))
+                current_paths.append(Path(instruction + "L", nodes_sofar + [node_left]))
         node_right = nodes_dict[current_node.left]
         if node_right.src.endswith("Z"):
             for instruction in partial_instructions:
                 yield node_right.src, instruction + "R"
         elif node_right not in nodes_sofar:
             for instruction in partial_instructions:
-                current_paths.append(Path(instruction + "R", nodes_sofar + node_right))
+                current_paths.append(Path(instruction + "R", nodes_sofar + [node_right]))
 
 
 def generate_lead_time(node: AnalyzedNode, nodes_dict: [str, AnalyzedNode], instructions: str) -> tuple[int, str]:
