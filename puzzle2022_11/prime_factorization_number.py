@@ -6,16 +6,27 @@ from typing import Self
 FIRST_PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 91, 97]
 
 
+def extend_first_primes(limit: int):
+    max_prime = max(FIRST_PRIMES)
+    for i in range(max_prime + 1, min(limit + 1, max_prime ** 2 + 1)):
+        if not any(i % prime == 0 for prime in FIRST_PRIMES):
+            FIRST_PRIMES.append(i)
+
+
 # Assumes given numbers have prime factors at most < 100 except for possibly the last one
 def factorize(num: int) -> dict[int, int]:
     result: dict[int, int] = defaultdict(int)
     for prime in FIRST_PRIMES:
-        while num % prime == 0:
+        while num % prime == 0 and num > 1:
             result[prime] += 1
             num = num // prime
     if num != 1:
-        print(f"Remaining prime factor: {num}")
-        result[num] += 1
+        extend_first_primes(num)
+        print(f"Just extended first primes to {max(FIRST_PRIMES)} because of {num}")
+        # Recurse
+        new_result = factorize(num)
+        for prime, factor in new_result.items():
+            result[prime] += factor
     return result
 
 
@@ -45,7 +56,7 @@ class PrimeFactorizationNumber:
 
     def __add__(self, other) -> Self:
         if isinstance(other, int):
-            return PrimeFactorizationNumber.from_int(self.to_int() + other)
+            return PrimeFactorizationNumber.from_int(int(self) + other)
         else:
             raise ValueError(f"Addition is unsupported between {self} and {other}")
 
@@ -58,7 +69,7 @@ class PrimeFactorizationNumber:
                 new_prime_factors[other] -= 1
                 return PrimeFactorizationNumber(new_prime_factors)
             else:
-                return PrimeFactorizationNumber.from_int(self.to_int() // other)
+                return PrimeFactorizationNumber.from_int(int(self) // other)
         else:
             raise ValueError(f"Addition is unsupported between {self} and {other}")
 
@@ -68,12 +79,12 @@ class PrimeFactorizationNumber:
             if other in new_prime_factors:
                 return 0
             else:
-                return self.to_int() % other
+                return int(self) % other
         else:
             raise ValueError(f"Modulo is unsupported between {self} and {other}")
 
-    def to_int(self) -> int:
+    def __int__(self) -> int:
         return prod(prime ** factor for prime, factor in self.prime_factors.items())
 
     def __repr__(self) -> str:
-        return str(self.to_int())
+        return str(int(self))
