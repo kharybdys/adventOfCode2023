@@ -19,9 +19,9 @@ class Node:
             case _:
                 raise ValueError(f"Invalid instruction {instruction}")
 
-    @staticmethod
-    def from_string(line: str) -> Self:
-        if match := Node.PATTERN.fullmatch(line):
-            return Node(src=match[1], left=match[2], right=match[3])
+    @classmethod
+    def from_string(cls, line: str) -> Self:
+        if match := cls.PATTERN.fullmatch(line):
+            return cls(src=match[1], left=match[2], right=match[3])
         else:
             raise ValueError(f"Invalid node definition: {line}")
