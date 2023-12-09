@@ -1,3 +1,4 @@
+import datetime
 import re
 
 from collections import deque, namedtuple
@@ -19,13 +20,18 @@ Path = namedtuple("Path", ["partial_instr", "nodes_sofar"])
 
 def analyze_nodes(nodes_dict: dict[str, AnalyzedNode], instructions: str):
     for node in nodes_dict.values():
+        print(f"Starting node {node.src} at {datetime.datetime.now()}")
         node.cycles = list(generate_self_cycles(node, nodes_dict))
+        print(f"Got cycles for {node.src} at {datetime.datetime.now()}")
         if node.src.endswith("A"):
             node.lead_time = generate_lead_time(node, nodes_dict, instructions)
+            print(f"Got lead time for {node.src} at {datetime.datetime.now()}")
     # path analysis needs completed cycle analysis on the entire graph
     for node in nodes_dict.values():
         if node.is_ending_node():
+            print(f"Starting paths for node {node.src} at {datetime.datetime.now()}")
             node.paths = list(generate_paths(node, nodes_dict))
+            print(f"Got paths for {node.src} at {datetime.datetime.now()}")
 
 
 def generate_self_cycles(node: AnalyzedNode, nodes_dict: [str, AnalyzedNode]) -> Generator[str, None, None]:
