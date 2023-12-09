@@ -4,6 +4,7 @@ from itertools import groupby
 
 from puzzle8.analyzer import AnalyzedNode, analyze_nodes
 
+
 @dataclass
 class Location:
     current_node: AnalyzedNode
@@ -17,7 +18,7 @@ class Attempt:
         self.locations = [Location(current_node=current_node, steps=0)]
 
     def can_finish(self) -> bool:
-        return all(location.current_node.src.endswith("Z") for location in self.locations)
+        return all(location.current_node.is_ending_node() for location in self.locations)
 
     def progress_one_step(self):
         result = []
@@ -53,7 +54,7 @@ class Attempt:
             if match := re.match(partial_instructions, self.extensive_instructions(earliest_location.steps)):
                 self.locations.append(Location(current_node=self.nodes_dict[target], steps=earliest_location.steps + len(match[0])))
 
-    def __le__(self, other) -> True:
+    def __lt__(self, other) -> True:
         if isinstance(other, Attempt):
             return self.earliest_location().steps < other.earliest_location().steps
         else:

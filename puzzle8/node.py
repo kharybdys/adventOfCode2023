@@ -3,7 +3,7 @@ from typing import Self
 
 
 class Node:
-    PATTERN = re.compile(r"([A-Z]{3}) = \(([A-Z]{3}), ([A-Z]{3})\)")
+    PATTERN = re.compile(r"([0-9A-Z]{3}) = \(([0-9A-Z]{3}), ([0-9A-Z]{3})\)")
 
     def __init__(self, src: str, left: str, right: str):
         self.src = src
@@ -18,6 +18,9 @@ class Node:
                 return self.right
             case _:
                 raise ValueError(f"Invalid instruction {instruction}")
+
+    def is_ending_node(self) -> bool:
+        return self.src.endswith("Z")
 
     @classmethod
     def from_string(cls, line: str) -> Self:
