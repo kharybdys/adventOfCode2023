@@ -1,30 +1,26 @@
 import re
-from dataclasses import dataclass
+from collections import defaultdict
 from itertools import groupby
 
 from puzzle8.analyzer import AnalyzedNode, analyze_nodes
-
-
-@dataclass
-class Location:
-    current_node: AnalyzedNode
-    steps: int
 
 
 class Attempt:
     def __init__(self, instructions: str, nodes_list: list[AnalyzedNode], current_node: AnalyzedNode):
         self.instructions = instructions
         self.nodes_dict = {node.src: node for node in nodes_list}
-        self.locations = [Location(current_node=current_node, steps=0)]
+        self.locations: dict[int, set[AnalyzedNode]] = defaultdict(set)
+        self.locations[0].add(current_node)
 
     def can_finish(self) -> bool:
-        return all(location.current_node.is_ending_node() for location in self.locations)
+        return all(node.is_ending_node() for nodes in self.locations.values() for node in nodes)
 
     def progress_one_step(self):
-        result = []
-        for location in self.locations:
-            instruction = self.instructions[self.get_instruction_pos(location.steps)]
-            result.append(Location(current_node=self.nodes_dict[location.current_node.go(instruction)], steps=location.steps + 1))
+        result: dict[int, set[AnalyzedNode]] = defaultdict(set)
+        for steps, nodes in self.locations.items():
+            instruction = self.instructions[self.get_instruction_pos(steps)]
+            for node in nodes:
+                result[steps + 1].add(self.nodes_dict[node.go(instruction)])
         self.locations = result
 
     def get_instruction_pos(self, steps: int) -> int:
@@ -35,28 +31,31 @@ class Attempt:
         return "".join([self.instructions[self.get_instruction_pos(steps):]] + [self.instructions] * COPIES)
 
     def process_lead_time(self):
-        result = []
-        for location in self.locations:
-            extra_steps, target = location.current_node.lead_time
-            if extra_steps:
-                result.append(Location(current_node=self.nodes_dict[target], steps=location.steps + extra_steps))
-            else:
-                raise ValueError(f"Lead time expected on current_node {location.current_node}")
+        result: dict[int, set[AnalyzedNode]] = defaultdict(set)
+        for steps, nodes in self.locations.items():
+            for node in nodes:
+                extra_steps, target = node.lead_time
+                if extra_steps:
+                    result[steps + extra_steps].add(self.nodes_dict[target])
+                else:
+                    raise ValueError(f"Lead time expected on current_node {node}")
         self.locations = result
 
-    def earliest_location(self) -> Location:
-        return min(self.locations, key=lambda l: l.steps)
+    def lowest_steps(self) -> int:
+        return min(self.locations)
 
     def process_paths(self):
-        earliest_location = self.earliest_location()
-        self.locations.remove(earliest_location)
-        for target, partial_instructions in earliest_location.current_node.paths:
-            if match := re.match(partial_instructions, self.extensive_instructions(earliest_location.steps)):
-                self.locations.append(Location(current_node=self.nodes_dict[target], steps=earliest_location.steps + len(match[0])))
+        lowest_steps = self.lowest_steps()
+        further_extended_instruction = self.extensive_instructions(lowest_steps)
+        nodes_to_process = self.locations.pop(lowest_steps)
+        for node in nodes_to_process:
+            for target, partial_instructions in node.paths:
+                if match := re.match(partial_instructions, further_extended_instruction):
+                    self.locations[lowest_steps + len(match[0])].add(self.nodes_dict[target])
 
     def __lt__(self, other) -> True:
         if isinstance(other, Attempt):
-            return self.earliest_location().steps < other.earliest_location().steps
+            return self.lowest_steps() < other.lowest_steps()
         else:
             raise ValueError(f"Cannot compare Attempts with other objects: {other}")
 
@@ -76,7 +75,7 @@ def solve_a(puzzle_input: list[str]) -> None:
     attempt = Attempt(instructions=instructions, nodes_list=nodes_list, current_node=nodes["AAA"])
     while not attempt.can_finish():
         attempt.progress_one_step()
-    print(attempt.earliest_location().steps)
+    print(attempt.lowest_steps())
 
 
 def solve_b(puzzle_input: list[str]) -> None:
@@ -90,7 +89,7 @@ def solve_b(puzzle_input: list[str]) -> None:
     analyze_nodes(nodes_dict={node.src: node for node in nodes_list}, instructions=instructions)
     for attempt in attempts:
         attempt.process_lead_time()
-    while not all_equal(attempt.earliest_location().steps for attempt in attempts):
+    while not all_equal(attempt.lowest_steps() for attempt in attempts):
         earliest_attempt = min(attempts)
         earliest_attempt.process_paths()
-    print(attempts[0].earliest_location().steps)
+    print(attempts[0].lowest_steps())
