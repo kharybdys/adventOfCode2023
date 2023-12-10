@@ -2,7 +2,7 @@ import datetime
 import re
 from collections import defaultdict
 
-from puzzle8.analyzer import AnalyzedNode, analyze_nodes
+from puzzle8.analyzer import AnalyzedNode, analyze_nodes, generate_possible_instructions
 from utils import all_equal
 
 
@@ -81,11 +81,13 @@ def solve_b(puzzle_input: list[str]) -> None:
     if puzzle_input[1] != "":
         raise ValueError("Missing separation line between instructions and nodes in the input")
     nodes_list = [AnalyzedNode.from_string(line) for line in puzzle_input[2:]]
+    partial_instructions_list = list(generate_possible_instructions(instructions, max_length=len(nodes_list)))
+    print(f"{partial_instructions_list=}")
+    print(f"{len(partial_instructions_list)}")
     attempts = [Attempt(instructions=instructions, nodes_list=nodes_list, current_node=node) for node in nodes_list if node.src.endswith("A")]
     print(f"Created attempts at {datetime.datetime.now()}")
     # Extra in part b, analyze the nodes for extra info
-    # TODO: analyzing nodes goes out of memory, specifically already the finding cycles - check algorithms for cycle detection!
-    analyze_nodes(nodes_dict={node.src: node for node in nodes_list}, instructions=instructions)
+    analyze_nodes(nodes_dict={node.src: node for node in nodes_list}, instructions=instructions, partial_instructions_list=partial_instructions_list)
     print(f"Finished analyzing nodes at {datetime.datetime.now()}")
     for attempt in attempts:
         attempt.process_lead_time()
