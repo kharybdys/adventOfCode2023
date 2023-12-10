@@ -1,7 +1,7 @@
 from collections import deque
 from dataclasses import dataclass
 
-from puzzle10.board import Board, Direction, PipeStatus
+from puzzle10.board import Board, Direction
 
 
 @dataclass
@@ -14,7 +14,7 @@ class Step:
         return self.x, self.y
 
 
-def steps_furthest_loop(board: Board) -> int:
+def generate_loop_steps(board: Board) -> dict[tuple[int, int], Step]:
     progress: dict[tuple[int, int], Step] = {}
     current_coordinates = deque()
     start_x, start_y = board.start_coordinates
@@ -34,12 +34,17 @@ def steps_furthest_loop(board: Board) -> int:
         if (x, y) in progress:
             if progress[(x, y)].step != previous_step.step + 1:
                 raise ValueError(f"Invalid solution, one direction says {progress[(x,y)].step} the other {previous_step.step + 1}")
-            return previous_step.step + 1
         else:
             progress[(x, y)] = Step(x=x, y=y, step=previous_step.step + 1)
             for direction in board.status_at(x, y).directions:
                 if direction != previous_direction:
                     current_coordinates.append(direction.next_coords(x, y))
+    return progress
+
+
+def steps_furthest_loop(board: Board) -> int:
+    loop = generate_loop_steps(board)
+    return max(s.step for s in loop.values())
 
 
 def solve_a(puzzle_input: list[str]) -> None:
@@ -54,3 +59,12 @@ def solve_a(puzzle_input: list[str]) -> None:
 
 def solve_b(puzzle_input: list[str]) -> None:
     print(puzzle_input)
+    board = Board.from_lines(puzzle_input)
+    board.print()
+    # Cleanup not really needed
+    board.cleanup()
+    board.print()
+    board.record_loop(generate_loop_steps(board).keys())
+    board.categorize_board()
+    board.print_categorization()
+    print(board.count_categorizations())

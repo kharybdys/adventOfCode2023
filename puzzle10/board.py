@@ -1,6 +1,8 @@
+from collections import defaultdict, Counter
 from enum import Enum
 from functools import cache, cached_property
-from typing import Self
+from itertools import chain
+from typing import Self, Generator
 
 DEBUG = False
 
@@ -78,17 +80,38 @@ class PipeStatus(Enum):
         raise ValueError(f"Unknown char {char}")
 
 
+class InsideOutsideStatus(Enum):
+    INSIDE = "INSIDE", "I"
+    OUTSIDE = "OUTSIDE", "O"
+    LOOP = "LOOP", "."
+    UNKNOWN = "UNKNOWN", " "
+
+    def __new__(cls, value, str_repr):
+        obj = object.__new__(cls)
+        obj._value_ = value
+        obj.str_repr = str_repr
+        return obj
+
+
 class Board:
     def __init__(self, tiles: list[list[PipeStatus]]):
         self.tiles = tiles
         self.height = len(tiles)
         self.width = len(tiles[0])
+        self.categorization: list[list[InsideOutsideStatus]] = [[InsideOutsideStatus.UNKNOWN for _ in line] for line in self.tiles]
+        self.loop: list[tuple[int, int]] = []
 
     def status_at(self, x: int, y: int) -> PipeStatus:
         if 0 <= x < self.width:
             if 0 <= y < self.height:
                 return self.tiles[y][x]
         return PipeStatus.EMPTY
+
+    def categorization_status_at(self, x: int, y: int) -> InsideOutsideStatus:
+        if 0 <= x < self.width:
+            if 0 <= y < self.height:
+                return self.categorization[y][x]
+        return InsideOutsideStatus.UNKNOWN
 
     def neighbour_at(self, x: int, y: int, direction: Direction) -> PipeStatus:
         new_x, new_y = direction.next_coords(x, y)
@@ -123,9 +146,83 @@ class Board:
             if DEBUG:
                 self.print()
 
+    def record_loop(self, loop_coordinates: list[tuple[int, int]]):
+        self.loop = loop_coordinates
+        for x, y in loop_coordinates:
+            self.categorization[y][x] = InsideOutsideStatus.LOOP
+        # Validate. All coordinates marked loop should have at least two coordinates marked loop
+        for x in range(0, self.width):
+            for y in range(0, self.height):
+                if self.categorization_status_at(x, y) == InsideOutsideStatus.LOOP:
+                    neighbours = Counter(self.categorization[new_y][new_x] for new_x, new_y in self.generate_new_coordinates_for_directions(x, y, Direction.all()))
+                    if neighbours.get(InsideOutsideStatus.LOOP, 0) < 2:
+                        raise ValueError(f"Incorrect loop recorded, all loop elements should have at least two loop neighbours. Failing at coordinate {x}, {y} with neighbours {neighbours}")
+
+    def generate_new_coordinates_for_directions(self, x: int, y: int, directions: list[Direction]) -> Generator[tuple[int, int], None, None]:
+        for direction in directions:
+            new_x, new_y = direction.next_coords(x, y)
+            if 0 <= new_x < self.width and 0 <= new_y < self.height:
+                yield new_x, new_y
+
+    def count_categorizations(self) -> dict[InsideOutsideStatus, int]:
+        return Counter(chain.from_iterable(self.categorization))
+
+    def is_categorized(self) -> bool:
+        return InsideOutsideStatus.UNKNOWN not in self.count_categorizations()
+
+    def categorize_board(self):
+        while not self.is_categorized():
+            self.extend_board_categorization()
+            self.walk_loop()
+
+    def extend_board_categorization(self):
+        total_changed = 0
+        changed = 1
+        while changed > 0:
+            changed = 0
+            for x in range(0, self.width):
+                for y in range(0, self.height):
+                    match self.categorization_status_at(x, y):
+                        case InsideOutsideStatus.LOOP:
+                            # If one side is marked outside or inside and the other empty one is "across" the pipe, mark that one the other way around
+                            # Won't be enough, only two are found like this at the end. Need to implement logic to find the squeezing
+                            neighbours = Counter(self.categorization[new_y][new_x] for new_x, new_y in self.generate_new_coordinates_for_directions(x, y, Direction.all()))
+                            if InsideOutsideStatus.UNKNOWN in neighbours and (InsideOutsideStatus.INSIDE in neighbours or InsideOutsideStatus.OUTSIDE in neighbours):
+                                print(f"{neighbours} for {x}, {y}")
+                            pass
+                        case InsideOutsideStatus.UNKNOWN:
+                            # If this one is unknown but it's on the edge of the board, mark as outside
+                            if x == 0 or y == 0 or x == self.width - 1 or y == self.height - 1:
+                                self.categorization[y][x] = InsideOutsideStatus.OUTSIDE
+                                changed += 1
+                        case our_status if our_status in [InsideOutsideStatus.OUTSIDE, InsideOutsideStatus.INSIDE]:
+                            # neighbours on UNKNOWN can be marked the same
+                            for new_x, new_y in self.generate_new_coordinates_for_directions(x, y, Direction.all()):
+                                if self.categorization_status_at(new_x, new_y) == InsideOutsideStatus.UNKNOWN:
+                                    self.categorization[new_y][new_x] = our_status
+                                    changed += 1
+                        case our_status:
+                            raise ValueError(f"Unknown InsideOutsideStatus {our_status} at {x}, {y}")
+            total_changed += changed
+            print(f"Categorizing has changed {changed} elements, for a total of {total_changed}")
+
+    def walk_loop(self):
+        # Find a starting point of the loop that has a neighbour who is either outside or inside.
+        # Note type of neighbour and "left" versus "right"
+        # Walk the loop keeping track of "direction". Any unknown neighbours of found elements should be
+        # marked the same or opposite depending on whether initial finding was left/right and inside/outside
+        # TODO: I don't think this will be enough actually
+        pass
+
     def print(self):
         print("Board: ")
         for line in self.tiles:
+            print("".join(tile.str_repr for tile in line))
+        print("")
+
+    def print_categorization(self):
+        print("Categorization board: ")
+        for line in self.categorization:
             print("".join(tile.str_repr for tile in line))
         print("")
 
