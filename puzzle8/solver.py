@@ -1,9 +1,9 @@
 import datetime
 import re
 from collections import defaultdict
-from itertools import groupby
 
 from puzzle8.analyzer import AnalyzedNode, analyze_nodes
+from utils import all_equal
 
 
 class Attempt:
@@ -59,11 +59,6 @@ class Attempt:
             return self.lowest_steps() < other.lowest_steps()
         else:
             raise ValueError(f"Cannot compare Attempts with other objects: {other}")
-
-
-def all_equal(iterable):
-    g = groupby(iterable)
-    return next(g, True) and not next(g, False)
 
 
 def solve_a(puzzle_input: list[str]) -> None:

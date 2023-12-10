@@ -3,6 +3,7 @@ from pathlib import Path
 import re
 
 import puzzle10
+import puzzle11
 import puzzle1a
 import puzzle1b
 import puzzle2
@@ -38,6 +39,8 @@ SOLVERS = {"1a": puzzle1a.solve,
            "9b": puzzle9.solve_b,
            "10a": puzzle10.solve_a,
            "10b": puzzle10.solve_b,
+           "11a": puzzle11.solve_a,
+           "11b": puzzle11.solve_b,
            "2021_24a": puzzle2021_24.solver.solve_a_too_slow,
            "2021_24b": puzzle2021_24.solve_b,
            "2021_25a": puzzle2021_25.solve_a,
@@ -49,7 +52,7 @@ SOLVERS = {"1a": puzzle1a.solve,
            }
 
 # I intend to manually change this for every puzzle
-DEFAULT_PUZZLE = "8b"
+DEFAULT_PUZZLE = "10a"
 EXAMPLE = False
 
 PUZZLE_NUMBER_PATTERN = re.compile(r"[\d_]+")
