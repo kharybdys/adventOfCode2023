@@ -28,7 +28,7 @@ class Attempt:
         return steps % len(self.instructions)
 
     def extensive_instructions(self, steps: int) -> str:
-        COPIES = 10
+        COPIES = 10000
         return "".join([self.instructions[self.get_instruction_pos(steps):]] + [self.instructions] * COPIES)
 
     def process_lead_time(self):
