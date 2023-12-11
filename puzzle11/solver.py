@@ -16,7 +16,7 @@ class Galaxy:
             raise ValueError("Cannot calculate a distance between Galaxy and something else")
 
 
-def generate_coordinates(lines: list[str]) -> Generator[Galaxy, None, None]:
+def generate_galaxies(lines: list[str]) -> Generator[Galaxy, None, None]:
     ident = 1
     for y, line in enumerate(lines):
         for x, char in enumerate(line):
@@ -47,13 +47,16 @@ def coordinates_to_corrections(coords: list[int], max_coord: int) -> dict[int, i
     return result
 
 
-def expand_coordinates(galaxies: Iterable[Galaxy]) -> Generator[Galaxy, None, None]:
+def expand_galaxies(galaxies: Iterable[Galaxy], increase_factor: int) -> Generator[Galaxy, None, None]:
     galaxies_by_coordinate, width, height = galaxies_to_dict(galaxies)
     x_coords, y_coords = zip(*galaxies_by_coordinate.keys())
     x_correction: dict[int, int] = coordinates_to_corrections(x_coords, width + 1)
     y_correction: dict[int, int] = coordinates_to_corrections(y_coords, height + 1)
     for g in galaxies_by_coordinate.values():
-        yield Galaxy(g.id, g.x + x_correction[g.x], g.y + y_correction[g.y])
+        yield Galaxy(id=g.id,
+                     x=g.x + x_correction[g.x] * (increase_factor - 1),
+                     y=g.y + y_correction[g.y] * (increase_factor - 1)
+                    )
 
 
 def print_galaxies(galaxies: Iterable[Galaxy]):
@@ -67,7 +70,7 @@ def print_galaxies(galaxies: Iterable[Galaxy]):
 
 def solve_a(puzzle_input: list[str]) -> None:
     print(puzzle_input)
-    galaxies = list(expand_coordinates(generate_coordinates(puzzle_input)))
+    galaxies = list(expand_galaxies(generate_galaxies(puzzle_input), 2))
     print_galaxies(galaxies)
     solution = 0
     for g1, g2 in combinations(galaxies, 2):
@@ -79,3 +82,10 @@ def solve_a(puzzle_input: list[str]) -> None:
 
 def solve_b(puzzle_input: list[str]) -> None:
     print(puzzle_input)
+    galaxies = list(expand_galaxies(generate_galaxies(puzzle_input), 1000000))
+    solution = 0
+    for g1, g2 in combinations(galaxies, 2):
+        distance = g1.distance(g2)
+        print(f"Distance between galaxies {g1.id} and {g2.id} is {distance}")
+        solution += distance
+    print(solution)
