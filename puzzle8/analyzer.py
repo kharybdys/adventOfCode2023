@@ -1,42 +1,63 @@
 import datetime
-import re
 
-from collections import deque, namedtuple, defaultdict
+from collections import deque, defaultdict
 from dataclasses import field, dataclass
-from typing import Generator
+from typing import Generator, Iterable
 
 from puzzle8.node import Node
+
+
+@dataclass
+class Path:
+    start_position: int
+    length: int
+    target: str
+
+
+@dataclass
+class PartialInstruction:
+    instr: str
+    start_positions: list[int] = field(default_factory=list)
+
+    @property
+    def length(self):
+        return len(self.instr)
 
 
 class AnalyzedNode(Node):
     def __init__(self, src: str, left: str, right: str):
         super().__init__(src, left, right)
         self.lead_time: tuple[int, str] = (-1, "")
-        self.paths: list[tuple[str, str]] = []
+        self.paths: dict[int, list[Path]] = defaultdict(list)
+
+    def add_to_paths(self, path: Path):
+        self.paths[path.start_position].append(path)
+
+    def __str__(self) -> str:
+        return f"AnalyzedNode[{self.node_id}"
 
 
-Path = namedtuple("Path", ["partial_instr", "nodes_sofar"])
-
-
-def analyze_nodes(nodes_dict: dict[str, AnalyzedNode], instructions: str, partial_instructions_list: list[str]):
+def analyze_nodes(nodes_dict: dict[str, AnalyzedNode], instructions: str, partial_instructions_list: list[PartialInstruction]):
     for node in nodes_dict.values():
-        print(f"Starting node {node.src} at {datetime.datetime.now()}")
+        print(f"Starting node {node.node_id} at {datetime.datetime.now()}")
         if node.is_ending_node():
-            node.paths = list(generate_paths(node, nodes_dict, partial_instructions_list))
-            print(f"Got paths for {node.src} at {datetime.datetime.now()}")
-        if node.src.endswith("A"):
+            for path in generate_paths(node, nodes_dict, partial_instructions_list):
+                node.add_to_paths(path)
+            print(f"Got paths for {node.node_id} at {datetime.datetime.now()}")
+        if node.node_id.endswith("A"):
             node.lead_time = generate_lead_time(node, nodes_dict, instructions)
-            print(f"Got lead time for {node.src} at {datetime.datetime.now()}")
+            print(f"Got lead time for {node.node_id} at {datetime.datetime.now()}")
 
 
-def generate_paths(node: AnalyzedNode, nodes_dict: [str, AnalyzedNode], partial_instructions_list: list[str]) -> Generator[tuple[str, str], None, None]:
+def generate_paths(node: AnalyzedNode, nodes_dict: [str, AnalyzedNode], partial_instructions_list: list[PartialInstruction]) -> Generator[Path, None, None]:
     """Returns a list of instructions that result in a path to an end node. Allows repetition,
      but has an inherent maximum length (from generating the partial_instructions_list)
        """
     for partial_instruction in partial_instructions_list:
-        dest = walk_path(node, nodes_dict, partial_instruction)
+        dest = walk_path(node, nodes_dict, partial_instruction.instr)
         if dest.is_ending_node():
-            yield partial_instruction, dest.src
+            for start_position in partial_instruction.start_positions:
+                yield Path(start_position=start_position, length=partial_instruction.length, target=dest.node_id)
 
 
 def walk_path(node: AnalyzedNode, nodes_dict: [str, AnalyzedNode], partial_instruction: str) -> AnalyzedNode:
@@ -46,46 +67,26 @@ def walk_path(node: AnalyzedNode, nodes_dict: [str, AnalyzedNode], partial_instr
     return dest
 
 
-ZERO_PATH_PATTERN = re.compile(r"\([^()]+\)\*\?")
-
-
-def ensure_non_zero_path_length(instruction: str) -> str:
-    if ZERO_PATH_PATTERN.fullmatch(instruction):
-        return instruction.replace("*", "+")
-    else:
-        return instruction
-
-
-def generate_lead_time(node: AnalyzedNode, nodes_dict: [str, AnalyzedNode], instructions: str) -> tuple[int, str]:
-    instruction_pos = 0
-    steps = 0
-    while not node.is_ending_node():
-        instruction = instructions[instruction_pos]
-        node = nodes_dict[node.go(instruction)]
-        steps += 1
-        instruction_pos += 1
-        if instruction_pos >= len(instructions):
-            instruction_pos = 0
-    return steps, node.src
-
-
-@dataclass
-class PartialInstruction:
-    instr: str
-    start_positions: list[int] = field(default_factory=list)
-
-
 def position_wrapped(position: int, wrap_at: int) -> int:
     return position % wrap_at
 
 
-def generate_possible_instructions(instructions: str, max_length: int) -> Generator[str, None, None]:
+def generate_lead_time(node: AnalyzedNode, nodes_dict: [str, AnalyzedNode], instructions: str) -> tuple[int, str]:
+    steps = 0
+    while not node.is_ending_node():
+        instruction = instructions[position_wrapped(steps, len(instructions))]
+        node = nodes_dict[node.go(instruction)]
+        steps += 1
+    return steps, node.node_id
+
+
+def generate_possible_instructions(instructions: str, max_length: int) -> Generator[PartialInstruction, None, None]:
     partial_instructions = deque()
     partial_instructions.append(PartialInstruction(instr="R", start_positions=[index for index, char in enumerate(instructions) if char == "R"]))
     partial_instructions.append(PartialInstruction(instr="L", start_positions=[index for index, char in enumerate(instructions) if char == "L"]))
     while partial_instructions:
         partial_instruction = partial_instructions.pop()
-        yield partial_instruction.instr
+        yield partial_instruction
         if len(partial_instruction.instr) < max_length:
             if len(partial_instruction.start_positions) == 1:
                 yield from extend_partial_instruction(partial_instruction, instructions, max_length)
@@ -98,8 +99,8 @@ def generate_possible_instructions(instructions: str, max_length: int) -> Genera
                     partial_instructions.append(PartialInstruction(instr=partial_instruction.instr + next_char, start_positions=start_positions))
 
 
-def extend_partial_instruction(partial_instruction: PartialInstruction, instructions: str, max_length: int):
+def extend_partial_instruction(partial_instruction: PartialInstruction, instructions: str, max_length: int) -> Generator[PartialInstruction, None, None]:
     instruction = partial_instruction.instr
     for i in range(len(partial_instruction.instr), max_length + 1):
         instruction += instructions[position_wrapped(partial_instruction.start_positions[0] + i, len(instructions))]
-        yield instruction
+        yield PartialInstruction(instr=instruction, start_positions=partial_instruction.start_positions)

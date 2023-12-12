@@ -1,5 +1,4 @@
 import datetime
-import re
 from collections import defaultdict
 
 from puzzle8.analyzer import AnalyzedNode, analyze_nodes, generate_possible_instructions
@@ -9,7 +8,7 @@ from utils import all_equal
 class Attempt:
     def __init__(self, instructions: str, nodes_list: list[AnalyzedNode], current_node: AnalyzedNode):
         self.instructions = instructions
-        self.nodes_dict = {node.src: node for node in nodes_list}
+        self.nodes_dict = {node.node_id: node for node in nodes_list}
         self.locations: dict[int, set[AnalyzedNode]] = defaultdict(set)
         self.locations[0].add(current_node)
 
@@ -27,10 +26,6 @@ class Attempt:
     def get_instruction_pos(self, steps: int) -> int:
         return steps % len(self.instructions)
 
-    def extensive_instructions(self, steps: int) -> str:
-        COPIES = 10000
-        return "".join([self.instructions[self.get_instruction_pos(steps):]] + [self.instructions] * COPIES)
-
     def process_lead_time(self):
         result: dict[int, set[AnalyzedNode]] = defaultdict(set)
         for steps, nodes in self.locations.items():
@@ -47,12 +42,10 @@ class Attempt:
 
     def process_paths(self):
         lowest_steps = self.lowest_steps()
-        further_extended_instruction = self.extensive_instructions(lowest_steps)
         nodes_to_process = self.locations.pop(lowest_steps)
         for node in nodes_to_process:
-            for target, partial_instructions in node.paths:
-                if match := re.match(partial_instructions, further_extended_instruction):
-                    self.locations[lowest_steps + len(match[0])].add(self.nodes_dict[target])
+            for path in node.paths.get(self.get_instruction_pos(lowest_steps), []):
+                self.locations[lowest_steps + path.length].add(self.nodes_dict[path.target])
 
     def __lt__(self, other) -> True:
         if isinstance(other, Attempt):
@@ -67,7 +60,7 @@ def solve_a(puzzle_input: list[str]) -> None:
     if puzzle_input[1] != "":
         raise ValueError("Missing separation line between instructions and nodes in the input")
     nodes_list = [AnalyzedNode.from_string(line) for line in puzzle_input[2:]]
-    nodes = {node.src: node for node in nodes_list}
+    nodes = {node.node_id: node for node in nodes_list}
     attempt = Attempt(instructions=instructions, nodes_list=nodes_list, current_node=nodes["AAA"])
     while not attempt.can_finish():
         attempt.progress_one_step()
@@ -75,26 +68,31 @@ def solve_a(puzzle_input: list[str]) -> None:
 
 
 def solve_b(puzzle_input: list[str]) -> None:
+    # Constraint on the solution, arbitrarily chosen
+    MAX_PATH_LENGTH = 2000
+
     print(puzzle_input)
     print(f"Started at {datetime.datetime.now()}")
     instructions = puzzle_input[0]
     if puzzle_input[1] != "":
         raise ValueError("Missing separation line between instructions and nodes in the input")
     nodes_list = [AnalyzedNode.from_string(line) for line in puzzle_input[2:]]
-    partial_instructions_list = list(generate_possible_instructions(instructions, max_length=len(nodes_list)))
-    print(f"{partial_instructions_list=}")
-    print(f"{len(partial_instructions_list)}")
-    attempts = [Attempt(instructions=instructions, nodes_list=nodes_list, current_node=node) for node in nodes_list if node.src.endswith("A")]
+    partial_instructions_list = list(generate_possible_instructions(instructions, max_length=MAX_PATH_LENGTH))
+    print(f"Length of partial_instructions_list is: {len(partial_instructions_list)}")
+    attempts = [Attempt(instructions=instructions, nodes_list=nodes_list, current_node=node) for node in nodes_list if node.node_id.endswith("A")]
     print(f"Created attempts at {datetime.datetime.now()}")
     # Extra in part b, analyze the nodes for extra info
-    analyze_nodes(nodes_dict={node.src: node for node in nodes_list}, instructions=instructions, partial_instructions_list=partial_instructions_list)
+    analyze_nodes(nodes_dict={node.node_id: node for node in nodes_list}, instructions=instructions, partial_instructions_list=partial_instructions_list)
     print(f"Finished analyzing nodes at {datetime.datetime.now()}")
     for attempt in attempts:
         attempt.process_lead_time()
     print(f"Finished processing lead times at {datetime.datetime.now()}")
+    for attempt in attempts:
+        print(f"At {attempt.locations}")
     while not all_equal(attempt.lowest_steps() for attempt in attempts):
         earliest_attempt = min(attempts)
         furthest_steps = max(attempts).lowest_steps()
         print(f"Currently processing an attempt with {earliest_attempt.lowest_steps()} steps. Furthest is on {furthest_steps}, time {datetime.datetime.now()}")
         earliest_attempt.process_paths()
+        print(f"After processing paths, locations are now: {earliest_attempt.locations}")
     print(attempts[0].lowest_steps())

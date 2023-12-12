@@ -6,7 +6,7 @@ class Node:
     PATTERN = re.compile(r"([0-9A-Z]{3}) = \(([0-9A-Z]{3}), ([0-9A-Z]{3})\)")
 
     def __init__(self, src: str, left: str, right: str):
-        self.src = src
+        self.node_id = src
         self.left = left
         self.right = right
 
@@ -20,7 +20,7 @@ class Node:
                 raise ValueError(f"Invalid instruction {instruction}")
 
     def is_ending_node(self) -> bool:
-        return self.src.endswith("Z")
+        return self.node_id.endswith("Z")
 
     @classmethod
     def from_string(cls, line: str) -> Self:
