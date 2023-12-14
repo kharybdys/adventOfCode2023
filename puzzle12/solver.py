@@ -1,21 +1,19 @@
 import re
-from collections import defaultdict
-from dataclasses import dataclass, field
-from typing import Self, Generator
+from typing import Generator
 
 
-def fill_unknown_to_part_cache(max_length: int) -> dict[str, list[str]]:
-    result: dict[str, list[str]] = defaultdict(list)
-    result["?"] = [".", "#"]
+def extend_unknown_to_part_cache(max_length: int):
     for length in range(2, max_length + 1):
         current_key = "?" * length
-        for previous_option in result["?" * (length - 1)]:
-            result[current_key].append(previous_option + ".")
-            result[current_key].append(previous_option + "#")
-    return result
+        if current_key not in UNKNOWN_TO_PART_CACHE:
+            result = []
+            for previous_option in UNKNOWN_TO_PART_CACHE["?" * (length - 1)]:
+                result.append(previous_option + ".")
+                result.append(previous_option + "#")
+            UNKNOWN_TO_PART_CACHE[current_key] = result
 
 
-UNKNOWN_TO_PART_CACHE: dict[str, list[str]] = fill_unknown_to_part_cache(17)  # 17 is the max length of ?'s in the given input
+UNKNOWN_TO_PART_CACHE: dict[str, list[str]] = {"?": [".", "#"]}
 PART_TO_POSSIBLE_PATTERN_CACHE: dict[str, list[list[int]]] = {}
 STRING_TO_PATTERN_PATTERN: re.Pattern = re.compile(r"\.+")
 
@@ -31,6 +29,8 @@ def _fill_in_splitted_part(splitted_part: list[str]) -> Generator[str, None, Non
     else:
         current_part = splitted_part[0]
         if "?" in current_part:
+            if current_part not in UNKNOWN_TO_PART_CACHE:
+                extend_unknown_to_part_cache(len(current_part))
             for possible_part in UNKNOWN_TO_PART_CACHE[current_part]:
                 yield from map(lambda s: possible_part + s, _fill_in_splitted_part(splitted_part[1:]))
         else:
@@ -67,8 +67,10 @@ def combinations_parts_to_pattern(parts: list[str], pattern: list[int]) -> int:
     return total
 
 
-def parse_line(line: str) -> tuple[list[str], list[int]]:
+def parse_line(line: str, multiplier: int) -> tuple[list[str], list[int]]:
     parts_string, pattern_string = line.split()
+    parts_string = "?".join([parts_string] * multiplier)
+    pattern_string = ",".join([pattern_string] * multiplier)
     parts = STRING_TO_PATTERN_PATTERN.split(parts_string)
     pattern = list(map(int, pattern_string.split(",")))
     return parts, pattern
@@ -78,12 +80,20 @@ def solve_a(puzzle_input: list[str]) -> None:
     print(puzzle_input)
     solution = 0
     for line in puzzle_input:
-        parts, pattern = parse_line(line)
+        parts, pattern = parse_line(line, 1)
         combination_count = combinations_parts_to_pattern(parts, pattern)
         print(f"Line {line} results in combinations {combination_count}")
         solution += combination_count
     print(solution)
 
 
+# TODO: Solution is far too slow with the increased input.
 def solve_b(puzzle_input: list[str]) -> None:
     print(puzzle_input)
+    solution = 0
+    for line in puzzle_input:
+        parts, pattern = parse_line(line, 5)
+        combination_count = combinations_parts_to_pattern(parts, pattern)
+        print(f"Line {line} results in combinations {combination_count}")
+        solution += combination_count
+    print(solution)
