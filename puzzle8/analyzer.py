@@ -39,12 +39,13 @@ class AnalyzedNode(Node):
 
 def analyze_nodes(nodes_dict: dict[str, AnalyzedNode], instructions: str, partial_instructions_list: list[PartialInstruction]):
     for node in nodes_dict.values():
-        print(f"Starting node {node.node_id} at {datetime.datetime.now()}")
         if node.is_ending_node():
+            print(f"Starting node {node.node_id} at {datetime.datetime.now()}")
             for path in generate_paths(node, nodes_dict, partial_instructions_list):
                 node.add_to_paths(path)
             print(f"Got paths for {node.node_id} at {datetime.datetime.now()}")
-        if node.node_id.endswith("A"):
+        elif node.node_id.endswith("A"):
+            print(f"Starting node {node.node_id} at {datetime.datetime.now()}")
             node.lead_time = generate_lead_time(node, nodes_dict, instructions)
             print(f"Got lead time for {node.node_id} at {datetime.datetime.now()}")
 

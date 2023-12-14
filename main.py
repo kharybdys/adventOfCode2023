@@ -5,6 +5,9 @@ import re
 import puzzle10
 import puzzle11
 import puzzle12
+import puzzle13
+import puzzle14
+import puzzle15
 import puzzle1a
 import puzzle1b
 import puzzle2
@@ -44,6 +47,12 @@ SOLVERS = {"1a": puzzle1a.solve,
            "11b": puzzle11.solve_b,
            "12a": puzzle12.solve_a,
            "12b": puzzle12.solve_b,
+           "13a": puzzle13.solve_a,
+           "13b": puzzle13.solve_b,
+           "14a": puzzle14.solve_a,
+           "14b": puzzle14.solve_b,
+           "15a": puzzle15.solve_a,
+           "15b": puzzle15.solve_b,
            "2021_24a": puzzle2021_24.solver.solve_a_too_slow,
            "2021_24b": puzzle2021_24.solve_b,
            "2021_25a": puzzle2021_25.solve_a,
@@ -55,7 +64,7 @@ SOLVERS = {"1a": puzzle1a.solve,
            }
 
 # I intend to manually change this for every puzzle
-DEFAULT_PUZZLE = "11b"
+DEFAULT_PUZZLE = "13a"
 EXAMPLE = False
 
 PUZZLE_NUMBER_PATTERN = re.compile(r"[\d_]+")
