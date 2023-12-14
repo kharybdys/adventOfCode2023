@@ -1,7 +1,8 @@
 from collections import deque
 from dataclasses import dataclass
 
-from puzzle10.board import Board, Direction
+from puzzle10.board import Board
+from utils import Direction
 
 
 @dataclass

@@ -1,6 +1,9 @@
+from copy import deepcopy
 from enum import Enum
 from itertools import starmap
 from typing import Generator, Self
+
+from utils import Direction
 
 
 class RockStatus(Enum):
@@ -46,17 +49,27 @@ class Dish:
         self.rocks[y][x] = value
 
     def roll_north(self):
+        self._roll(Direction.NORTH)
+
+    def _roll(self, direction: Direction):
         changed = True
         while changed:
             changed = False
-            for y in range(1, self.height):
+            for y in range(0, self.height):
                 for x in range(0, self.width):
                     if self.rock_at(x, y).can_roll():
-                        if self.rock_at(x, y - 1).empty():
+                        new_x, new_y = direction.next_coords(x, y)
+                        if self.within_bounds(new_x, new_y) and self.rock_at(new_x, new_y).empty():
                             rock_to_move = self.rock_at(x, y)
                             self.set_rock_at(x, y, RockStatus.EMPTY)
-                            self.set_rock_at(x, y - 1, rock_to_move)
+                            self.set_rock_at(new_x, new_y, rock_to_move)
                             changed = True
+
+    def spin_cycle(self):
+        self._roll(Direction.NORTH)
+        self._roll(Direction.WEST)
+        self._roll(Direction.SOUTH)
+        self._roll(Direction.EAST)
 
     def generate_rock_with_coordinates(self) -> Generator[tuple[RockStatus, int, int], None, None]:
         for y in range(0, self.height):
@@ -73,6 +86,15 @@ class Dish:
         for line in self.rocks:
             print("".join(map(lambda r: r.str_repr, line)))
         print("")
+
+    def snapshot(self) -> tuple[tuple[RockStatus]]:
+        return tuple(tuple(line) for line in self.rocks)
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Dish):
+            return self.rocks == other.rocks
+        else:
+            return False
 
     @staticmethod
     def from_lines(lines: list[str]) -> Self:
