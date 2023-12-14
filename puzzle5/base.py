@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from itertools import batched
 from typing import Self, Generator
 
+from utils import split_in_groups_separated_by_empty_line
+
 
 @dataclass(order=True)
 class Range:
@@ -85,17 +87,6 @@ class Problem(ABC):
         min_range = min(ranges)
         return min_range.start
 
-    @staticmethod
-    def split_on_empty_line(lines: list[str]) -> Generator[list[str], None, None]:
-        result = []
-        for line in lines:
-            if line:
-                result.append(line)
-            else:
-                yield result
-                result = []
-        yield result
-
     @abstractmethod
     def generate_seeds(self) -> Generator[Range, None, None]:
         pass
@@ -104,7 +95,7 @@ class Problem(ABC):
     def from_string(cls, lines: list[str]) -> Self:
         seeds_line = ""
         converters = []
-        for block in Problem.split_on_empty_line(lines):
+        for block in split_in_groups_separated_by_empty_line(lines):
             if block[0].startswith(Problem.SEEDS_PREFIX):
                 seeds_line = block[0].removeprefix(Problem.SEEDS_PREFIX)
             else:
