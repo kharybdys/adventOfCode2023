@@ -1,9 +1,11 @@
 from collections import deque, defaultdict
 from dataclasses import dataclass
 from enum import Enum
-from typing import Self, Generator
+from typing import Self
 
 from utils import Direction
+
+DEBUG = False
 
 
 @dataclass
@@ -110,13 +112,15 @@ class Grid:
         while current_beams:
             beam = current_beams.popleft()
             if beam.entry in result.get((beam.x, beam.y), set()):
-                print(f"Detecting cycle, already got {beam.entry} at {beam.x}, {beam.y}")
+                if DEBUG:
+                    print(f"Detecting cycle, already got {beam.entry} at {beam.x}, {beam.y}")
             else:
                 result[(beam.x, beam.y)].add(beam.entry)
                 for exit_direction in self.status_at(beam.x, beam.y).beam_to(beam.entry):
                     new_x, new_y = exit_direction.next_coords(beam.x, beam.y)
                     if self.within_bounds(new_x, new_y):
                         new_beam = Beam(new_x, new_y, exit_direction.opposite)
-                        print(f"Beam from {beam.entry} at {beam.x}, {beam.y}, causes new beam from {new_beam.entry} at {new_beam.x}, {new_beam.y}")
                         current_beams.append(new_beam)
+                        if DEBUG:
+                            print(f"Beam from {beam.entry} at {beam.x}, {beam.y}, causes new beam from {new_beam.entry} at {new_beam.x}, {new_beam.y}")
         return result
