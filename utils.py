@@ -21,10 +21,16 @@ def split_in_groups_separated_by_empty_line(puzzle_input: list[str]) -> Generato
 
 
 class Direction(Enum):
-    EAST = "EAST"
-    WEST = "WEST"
-    SOUTH = "SOUTH"
-    NORTH = "NORTH"
+    EAST = "EAST", "<"
+    WEST = "WEST", ">"
+    SOUTH = "SOUTH", "^"
+    NORTH = "NORTH", "v"
+
+    def __new__(cls, value, str_repr):
+        obj = object.__new__(cls)
+        obj._value_ = value
+        obj.str_repr = str_repr
+        return obj
 
     def next_coords(self, x: int, y: int) -> tuple[int, int]:
         match self:
