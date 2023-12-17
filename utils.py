@@ -32,6 +32,12 @@ class Direction(Enum):
         obj.str_repr = str_repr
         return obj
 
+    def __lt__(self, other) -> bool:
+        if isinstance(other, Direction):
+            return self.value < other.value
+        else:
+            raise TypeError(f"Cannot compare {self} with {other}")
+
     def next_coords(self, x: int, y: int) -> tuple[int, int]:
         match self:
             case Direction.EAST:
@@ -58,6 +64,12 @@ class Direction(Enum):
                 return Direction.NORTH
             case _:
                 raise ValueError(f"Impossible, unsupported direction: {self}")
+
+    @cached_property
+    def all_but_me(self) -> list[Self]:
+        result = self.all()
+        result.remove(self)
+        return result
 
     @classmethod
     def all(cls) -> list[Self]:
