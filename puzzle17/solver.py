@@ -32,6 +32,7 @@ class Attempt:
     end_y: int
     entry: Direction
     grid: IntGrid
+    route: dict[tuple[int, int], Direction] = field(default_factory=dict)
     straight_steps_taken: int = 1
     max_straight_steps: ClassVar[int] = 3
 
@@ -40,11 +41,17 @@ class Attempt:
         remaining_distances = calculate_remaining_distance(self.grid)
         return self.cost + remaining_distances[(self.x, self.y)]
 
+    @cached_property
+    def primary_key(self) -> tuple[int, int, Direction, int]:
+        return self.x, self.y, self.entry, self.straight_steps_taken
+
     def at_finish(self) -> bool:
         return self.x == self.end_x and self.y == self.end_y
 
     def next_attempt(self, new_x: int, new_y: int, cost_addition: int, new_entry: Direction) -> Self:
         new_straight_steps_taken = 1 if new_entry != self.entry else self.straight_steps_taken + 1
+        new_route = self.route.copy()
+        new_route[(self.x, self.y)] = self.entry
         return Attempt(cost=self.cost + cost_addition,
                        x=new_x,
                        y=new_y,
@@ -52,6 +59,7 @@ class Attempt:
                        end_y=self.end_y,
                        entry=new_entry,
                        grid=self.grid,
+                       route = new_route,
                        straight_steps_taken=new_straight_steps_taken)
 
     def __lt__(self, other) -> bool:
@@ -61,7 +69,13 @@ class Attempt:
             raise TypeError(f"Cannot compare {self} with {other}")
 
 
+def print_route_and_grid(route: dict[tuple[int, int], Direction], grid: IntGrid):
+    for y in range(0, grid.height):
+        print("".join(route[(x, y)].str_repr if (x, y) in route else str(grid.value_at(x, y)) for x in range(0, grid.width)))
+
+
 def find_minimal_path(grid: IntGrid, first_attempt: Attempt) -> int:
+    already_tried_attempts: set[tuple[int, int, Direction, int]] = set()
     attempts = PriorityQueue()
     attempts.put_nowait(first_attempt)
     while not attempts.empty():
@@ -69,13 +83,17 @@ def find_minimal_path(grid: IntGrid, first_attempt: Attempt) -> int:
         print(f"Looking at {attempt.minimal_cost}")
 
         if attempt.at_finish():
+            print_route_and_grid(attempt.route, grid)
             return attempt.cost
         else:
+            already_tried_attempts.add(attempt.primary_key)
             for direction in attempt.entry.all_but_me:
                 if direction != attempt.entry.opposite or attempt.straight_steps_taken < attempt.max_straight_steps:
                     new_x, new_y = direction.next_coords(attempt.x, attempt.y)
                     if grid.within_bounds(new_x, new_y):
-                        attempts.put_nowait(attempt.next_attempt(new_x, new_y, grid.value_at(new_x, new_y), direction.opposite))
+                        next_attempt = attempt.next_attempt(new_x, new_y, grid.value_at(new_x, new_y), direction.opposite)
+                        if next_attempt.primary_key not in already_tried_attempts:
+                            attempts.put_nowait(next_attempt)
 
 
 def solve_a(puzzle_input: list[str]) -> None:
