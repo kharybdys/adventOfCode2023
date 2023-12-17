@@ -1,7 +1,7 @@
 from enum import Enum
 from functools import cached_property
 from itertools import groupby
-from typing import Generator, Self
+from typing import Generator, Self, TypeVar, Generic, Callable
 
 
 def all_equal(iterable):
@@ -62,3 +62,23 @@ class Direction(Enum):
     @classmethod
     def all(cls) -> list[Self]:
         return list(cls.__members__.values())
+
+
+T = TypeVar("T")
+
+
+class Grid(Generic[T]):
+    def __init__(self, tiles: list[list[T]]):
+        self.tiles: list[list[T]] = tiles
+        self.height = len(tiles)
+        self.width = len(tiles[0])
+
+    @staticmethod
+    def from_lines(lines: list[str], converter_function: Callable[[str], T]):
+        return Grid(tiles=[[converter_function(char) for char in line] for line in lines])
+
+    def within_bounds(self, x: int, y: int) -> bool:
+        return 0 <= x < self.width and 0 <= y < self.height
+
+    def value_at(self, x: int, y: int) -> T:
+        return self.tiles[y][x]

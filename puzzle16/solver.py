@@ -1,13 +1,14 @@
-from collections import defaultdict
 from typing import Generator
 
-from puzzle16.grid import Grid, Beam
-from utils import Direction
+from puzzle16.mirrors_and_splitters import Beam, TileStatus, generate_beams_by_coords
+from utils import Direction, Grid
+
+GridWithTileStatus = Grid[TileStatus]
 
 
-def print_grid_and_beams(grid: Grid, beams_by_coords: dict[tuple[int, int], set[Direction]]):
+def print_grid_and_beams(grid: GridWithTileStatus, beams_by_coords: dict[tuple[int, int], set[Direction]]):
     def print_char_at(x: int, y: int) -> str:
-        tile = grid.status_at(x, y)
+        tile = grid.value_at(x, y)
         beams = beams_by_coords.get((x, y), [])
         if not tile.empty() or not beams:
             return tile.str_repr
@@ -23,8 +24,8 @@ def print_grid_and_beams(grid: Grid, beams_by_coords: dict[tuple[int, int], set[
 
 def solve_a(puzzle_input: list[str]) -> None:
     print(puzzle_input)
-    grid = Grid.from_lines(puzzle_input)
-    beams_by_coords = grid.generate_beams_by_coords(Beam(0, 0, Direction.WEST))
+    grid = Grid.from_lines(puzzle_input, TileStatus.from_char)
+    beams_by_coords = generate_beams_by_coords(grid, Beam(0, 0, Direction.WEST))
     print_grid_and_beams(grid, beams_by_coords=beams_by_coords)
     print(len(beams_by_coords.keys()))
 
@@ -36,11 +37,11 @@ def calculate_energization_for_all_options(grid: Grid) -> Generator[int, None, N
     options.extend(Beam(x, grid.height - 1, Direction.SOUTH) for x in range(0, grid.width))
     options.extend(Beam(grid.width - 1, y, Direction.EAST) for y in range(0, grid.height))
     for option in options:
-        beams_by_coords = grid.generate_beams_by_coords(option)
+        beams_by_coords = generate_beams_by_coords(grid, option)
         yield len(beams_by_coords.keys())
 
 
 def solve_b(puzzle_input: list[str]) -> None:
     print(puzzle_input)
-    grid = Grid.from_lines(puzzle_input)
+    grid = Grid.from_lines(puzzle_input, TileStatus.from_char)
     print(max(calculate_energization_for_all_options(grid)))

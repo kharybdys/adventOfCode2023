@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Self
 
-from utils import Direction
+from utils import Direction, Grid
 
 DEBUG = False
 
@@ -86,41 +86,22 @@ class TileStatus(Enum):
         raise ValueError(f"Unknown char {char}")
 
 
-class Grid:
-    def __init__(self, tiles: list[list[TileStatus]]):
-        self.tiles = tiles
-        self.height = len(tiles)
-        self.width = len(tiles[0])
-
-    @staticmethod
-    def from_lines(lines: list[str]) -> Self:
-        return Grid(tiles=[[TileStatus.from_char(char) for char in line] for line in lines])
-
-    def within_bounds(self, x: int, y: int) -> bool:
-        return 0 <= x < self.width and 0 <= y < self.height
-
-    def status_at(self, x: int, y: int) -> TileStatus:
-        if self.within_bounds(x, y):
-            return self.tiles[y][x]
+def generate_beams_by_coords(grid: Grid, initial_beam: Beam) -> dict[tuple[int, int], set[Direction]]:
+    result: dict[tuple[int, int], set[Direction]] = defaultdict(set)
+    current_beams = deque()
+    current_beams.append(initial_beam)
+    while current_beams:
+        beam = current_beams.popleft()
+        if beam.entry in result.get((beam.x, beam.y), set()):
+            if DEBUG:
+                print(f"Detecting cycle, already got {beam.entry} at {beam.x}, {beam.y}")
         else:
-            return TileStatus.EMPTY
-
-    def generate_beams_by_coords(self, initial_beam: Beam) -> dict[tuple[int, int], set[Direction]]:
-        result: dict[tuple[int, int], set[Direction]] = defaultdict(set)
-        current_beams = deque()
-        current_beams.append(initial_beam)
-        while current_beams:
-            beam = current_beams.popleft()
-            if beam.entry in result.get((beam.x, beam.y), set()):
-                if DEBUG:
-                    print(f"Detecting cycle, already got {beam.entry} at {beam.x}, {beam.y}")
-            else:
-                result[(beam.x, beam.y)].add(beam.entry)
-                for exit_direction in self.status_at(beam.x, beam.y).beam_to(beam.entry):
-                    new_x, new_y = exit_direction.next_coords(beam.x, beam.y)
-                    if self.within_bounds(new_x, new_y):
-                        new_beam = Beam(new_x, new_y, exit_direction.opposite)
-                        current_beams.append(new_beam)
-                        if DEBUG:
-                            print(f"Beam from {beam.entry} at {beam.x}, {beam.y}, causes new beam from {new_beam.entry} at {new_beam.x}, {new_beam.y}")
-        return result
+            result[(beam.x, beam.y)].add(beam.entry)
+            for exit_direction in grid.value_at(beam.x, beam.y).beam_to(beam.entry):
+                new_x, new_y = exit_direction.next_coords(beam.x, beam.y)
+                if grid.within_bounds(new_x, new_y):
+                    new_beam = Beam(new_x, new_y, exit_direction.opposite)
+                    current_beams.append(new_beam)
+                    if DEBUG:
+                        print(f"Beam from {beam.entry} at {beam.x}, {beam.y}, causes new beam from {new_beam.entry} at {new_beam.x}, {new_beam.y}")
+    return result
