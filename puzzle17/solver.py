@@ -11,6 +11,7 @@ IntGrid = Grid[int]
 
 @cache
 def calculate_remaining_distance(grid: IntGrid) -> dict[tuple[int, int], int]:
+    # TODO: Quite probably this is not a correct minimum distance in some situations - but doesn't solve it
     result: dict[tuple[int, int], int] = {(grid.width - 1, grid.height - 1): 0}
     max_summed_coords = grid.width + grid.height - 2
     for diff_summed_coords in range(1, max_summed_coords + 1):
@@ -31,9 +32,9 @@ class Attempt:
     end_x: int
     end_y: int
     entry: Direction
+    straight_steps_taken: int
     grid: IntGrid
     route: dict[tuple[int, int], Direction] = field(default_factory=dict)
-    straight_steps_taken: int = 1
     max_straight_steps: ClassVar[int] = 3
 
     @cached_property
@@ -78,14 +79,18 @@ def find_minimal_path(grid: IntGrid, first_attempt: Attempt) -> int:
     already_tried_attempts: set[tuple[int, int, Direction, int]] = set()
     attempts = PriorityQueue()
     attempts.put_nowait(first_attempt)
+    best_cost = 1000000000
     while not attempts.empty():
         attempt: Attempt = attempts.get_nowait()
-        print(f"Looking at {attempt.minimal_cost}")
+        # print(f"Looking at {attempt.minimal_cost}")
 
         if attempt.at_finish():
-            print_route_and_grid(attempt.route, grid)
-            return attempt.cost
-        else:
+            # With correct remaining distance, ending here should be enough
+            # print_route_and_grid(attempt.route, grid)
+            if attempt.cost < best_cost:
+                best_cost = attempt.cost
+                print(f"Improved best_cost to {attempt.cost}")
+        elif attempt.cost < best_cost:
             already_tried_attempts.add(attempt.primary_key)
             for direction in attempt.entry.all_but_me:
                 if direction != attempt.entry.opposite or attempt.straight_steps_taken < attempt.max_straight_steps:
@@ -94,6 +99,7 @@ def find_minimal_path(grid: IntGrid, first_attempt: Attempt) -> int:
                         next_attempt = attempt.next_attempt(new_x, new_y, grid.value_at(new_x, new_y), direction.opposite)
                         if next_attempt.primary_key not in already_tried_attempts:
                             attempts.put_nowait(next_attempt)
+    return best_cost
 
 
 def solve_a(puzzle_input: list[str]) -> None:
@@ -106,6 +112,7 @@ def solve_a(puzzle_input: list[str]) -> None:
                                                   end_x=grid.width - 1,
                                                   end_y=grid.height - 1,
                                                   entry=Direction.NORTH,
+                                                  straight_steps_taken=0,
                                                   grid=grid
                                                   )
                             ))
