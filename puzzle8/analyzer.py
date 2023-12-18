@@ -2,7 +2,7 @@ import datetime
 
 from collections import deque, defaultdict
 from dataclasses import field, dataclass
-from typing import Generator, Iterable
+from typing import Generator
 
 from puzzle8.node import Node
 

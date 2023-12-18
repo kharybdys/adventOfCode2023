@@ -1,7 +1,9 @@
 import datetime
 from collections import defaultdict
+from functools import reduce
 
 from puzzle8.analyzer import AnalyzedNode, analyze_nodes, generate_possible_instructions
+from puzzle8.instructor import InstructedNode, instruct_nodes
 from utils import all_equal
 
 
@@ -67,8 +69,8 @@ def solve_a(puzzle_input: list[str]) -> None:
     print(attempt.lowest_steps())
 
 
-def solve_b(puzzle_input: list[str]) -> None:
-    # Constraint on the solution, arbitrarily chosen
+def solve_b_with_reduction_of_graph(puzzle_input: list[str]) -> None:
+    # Constraint on the solution, arbitrarily chosen. Should be much bigger
     MAX_PATH_LENGTH = 2000
 
     print(puzzle_input)
@@ -96,3 +98,34 @@ def solve_b(puzzle_input: list[str]) -> None:
         earliest_attempt.process_paths()
         print(f"After processing paths, locations are now: {earliest_attempt.locations}")
     print(attempts[0].lowest_steps())
+
+
+def reach_end(current_nodes: list[InstructedNode], nodes_dict: dict[str, InstructedNode], cycle_size: int) -> int:
+    current_iteration_start = 1
+    while True:
+        if all(node.is_ending_node() for node in current_nodes):
+            return current_iteration_start
+        else:
+            if all(node.can_finish_at for node in current_nodes):
+                intersected_can_finish_at = reduce(lambda a, b: a.intersection(b), [node.can_finish_at for node in current_nodes])
+                if intersected_can_finish_at:
+                    print(f"Returning with {intersected_can_finish_at} and {current_iteration_start}")
+                    return min(intersected_can_finish_at) + current_iteration_start
+        current_iteration_start += cycle_size
+        current_nodes = [nodes_dict[node.end_node] for node in current_nodes]
+        if current_iteration_start % (cycle_size * 100) == 1:
+            print(f"At {current_iteration_start} at {datetime.datetime.now()}")
+
+
+def solve_b(puzzle_input: list[str]) -> None:
+    print(puzzle_input)
+    print(f"Started at {datetime.datetime.now()}")
+    instructions = puzzle_input[0]
+    if puzzle_input[1] != "":
+        raise ValueError("Missing separation line between instructions and nodes in the input")
+    nodes_list = [InstructedNode.from_string(line) for line in puzzle_input[2:]]
+    nodes_dict = {node.node_id: node for node in nodes_list}
+    instruct_nodes(nodes_dict, instructions)
+    print(f"Finished instructing nodes at {datetime.datetime.now()}")
+    current_nodes = [node for node in nodes_dict.values() if node.node_id.endswith("A")]
+    print(reach_end(current_nodes, nodes_dict, len(instructions)))
