@@ -43,11 +43,12 @@ def analyze_nodes(nodes_dict: dict[str, AnalyzedNode], instructions: str, partia
             print(f"Starting node {node.node_id} at {datetime.datetime.now()}")
             for path in generate_paths(node, nodes_dict, partial_instructions_list):
                 node.add_to_paths(path)
+                print(f"Found a path from {node.node_id} to {path.target} with length {path.length}")
             print(f"Got paths for {node.node_id} at {datetime.datetime.now()}")
         elif node.node_id.endswith("A"):
             print(f"Starting node {node.node_id} at {datetime.datetime.now()}")
             node.lead_time = generate_lead_time(node, nodes_dict, instructions)
-            print(f"Got lead time for {node.node_id} at {datetime.datetime.now()}")
+            print(f"Got lead time for {node.node_id}, namely {node.lead_time} at {datetime.datetime.now()}")
 
 
 def generate_paths(node: AnalyzedNode, nodes_dict: [str, AnalyzedNode], partial_instructions_list: list[PartialInstruction]) -> Generator[Path, None, None]:
