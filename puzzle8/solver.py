@@ -117,7 +117,7 @@ def reach_end(current_nodes: list[InstructedNode], nodes_dict: dict[str, Instruc
             print(f"At {current_iteration_start} at {datetime.datetime.now()}")
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b_with_instructions(puzzle_input: list[str]) -> None:
     print(puzzle_input)
     print(f"Started at {datetime.datetime.now()}")
     instructions = puzzle_input[0]
@@ -129,3 +129,7 @@ def solve_b(puzzle_input: list[str]) -> None:
     print(f"Finished instructing nodes at {datetime.datetime.now()}")
     current_nodes = [node for node in nodes_dict.values() if node.node_id.endswith("A")]
     print(reach_end(current_nodes, nodes_dict, len(instructions)))
+
+
+def solve_b(puzzle_input: list[str]) -> None:
+    solve_b_with_reduction_of_graph(puzzle_input)
