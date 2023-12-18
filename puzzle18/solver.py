@@ -5,6 +5,7 @@ from typing import Generator
 
 from utils import Direction, Grid
 
+DEBUG = False
 
 BoolGrid = Grid[bool]
 
@@ -65,6 +66,7 @@ def fill_grid(grid: BoolGrid, start_x, start_y):
                     frontier.append((new_x, new_y))
 
 
+# Initial solution for Part One. Too naive for Part Two
 def solve_dig_instructions(dig_instructions: list[DigInstruction]) -> int:
     width, height, start_x, start_y = analyze(dig_instructions)
     print(f"{width=}, {height=}, {start_x=}, {start_y=}")
@@ -85,6 +87,91 @@ def solve_dig_instructions(dig_instructions: list[DigInstruction]) -> int:
     return sum(1 for tile in grid.tiles_iterator if tile)
 
 
+def find_duplicated_dig_instruction(dig_instructions: list[DigInstruction]) -> bool:
+    for i in range(0, len(dig_instructions)):
+        curr = dig_instructions[i - 1]
+        nxt = dig_instructions[i]
+        if curr.direction == nxt.direction:
+            curr.distance += nxt.distance
+            dig_instructions.remove(nxt)
+            return True
+    return False
+
+
+def solve_dig_instructions_for_big_numbers(dig_instructions: list[DigInstruction]) -> int:
+    confirmed_dug = 0
+    while dig_instructions:
+        while find_duplicated_dig_instruction(dig_instructions):
+            pass
+        if DEBUG:
+            for dig_instruction in dig_instructions:
+                print(dig_instruction)
+        else:
+            print(f"Length of dig_instructions reduced to: {len(dig_instructions)}")
+        if dig_instructions:
+            if DEBUG:
+                print(f"Next iteration, {confirmed_dug=}: ")
+            for i in range(0, len(dig_instructions)):
+                prev = dig_instructions[i - 2]
+                curr = dig_instructions[i - 1]
+                nxt = dig_instructions[i]
+                if prev.direction.opposite == nxt.direction and curr.direction not in [prev.direction, nxt.direction]:
+                    if DEBUG:
+                        print(f"Found bulge, {prev=}, {curr=}, {nxt=}")
+                    if prev.distance < nxt.distance:
+                        if DEBUG:
+                            print(f"Removing {prev}")
+                        dig_instructions.remove(prev)
+                        w = prev.distance
+                        nxt.distance -= prev.distance
+                    elif prev.distance == nxt.distance:
+                        if DEBUG:
+                            print(f"Removing {nxt}")
+                            print(f"Removing {prev}")
+                        dig_instructions.remove(nxt)
+                        dig_instructions.remove(prev)
+                        w = prev.distance
+                    elif nxt.distance <= prev.distance:
+                        if DEBUG:
+                            print(f"Removing {nxt}")
+                        dig_instructions.remove(nxt)
+                        prev.distance -= nxt.distance
+                        w = nxt.distance
+                    else:
+                        raise ValueError("Unreachable")
+                    confirmed_dug += (curr.distance + 1) * w
+                    break
+                if curr.direction.opposite == nxt.direction:
+                    if DEBUG:
+                        print(f"Found opposite directions, {curr=}, {nxt=}")
+                    if curr.distance > nxt.distance:
+                        curr.distance -= nxt.distance
+                        if DEBUG:
+                            print(f"Removing {nxt}")
+                        dig_instructions.remove(nxt)
+                        w = nxt.distance
+                    elif curr.distance == nxt.distance:
+                        if DEBUG:
+                            print(f"Removing {nxt}")
+                            print(f"Removing {curr}")
+                        dig_instructions.remove(nxt)
+                        dig_instructions.remove(curr)
+                        w = nxt.distance
+                    elif curr.distance < nxt.distance:
+                        nxt.distance -= curr.distance
+                        if DEBUG:
+                            print(f"Removing {curr}")
+                        dig_instructions.remove(curr)
+                        w = curr.distance
+                    else:
+                        raise ValueError("Unreachable")
+                    confirmed_dug += w
+                    break
+
+    print(dig_instructions)
+    return confirmed_dug + 1  # Correct for final untracked square (the one we end up after reduction)
+
+
 def parse(puzzle_input: list[str]) -> Generator[DigInstruction, None, None]:
     INPUT_PATTERN = re.compile(r"(U|D|L|R) (\d+) \(#([a-f0-9]{6})\)")
     direction_map = {"U": Direction.NORTH,
@@ -103,7 +190,15 @@ def parse(puzzle_input: list[str]) -> Generator[DigInstruction, None, None]:
 def solve_a(puzzle_input: list[str]) -> None:
     print(puzzle_input)
     dig_instructions = list(parse(puzzle_input))
-    print(solve_dig_instructions(dig_instructions))
+    print(solve_dig_instructions_for_big_numbers(dig_instructions))
+
+
+def solve_b_naive(puzzle_input: list[str]) -> None:
+    print(puzzle_input)
+    dig_instructions = list(parse(puzzle_input))
+    for dig_instruction in dig_instructions:
+        dig_instruction.parse_hex()
+    print(solve_dig_instructions_for_big_numbers(dig_instructions))
 
 
 def solve_b(puzzle_input: list[str]) -> None:
@@ -111,4 +206,5 @@ def solve_b(puzzle_input: list[str]) -> None:
     dig_instructions = list(parse(puzzle_input))
     for dig_instruction in dig_instructions:
         dig_instruction.parse_hex()
-    print(solve_dig_instructions(dig_instructions))
+        print(dig_instruction)
+    print(solve_dig_instructions_for_big_numbers(dig_instructions))
