@@ -38,16 +38,16 @@ class Direction(Enum):
         else:
             raise TypeError(f"Cannot compare {self} with {other}")
 
-    def next_coords(self, x: int, y: int) -> tuple[int, int]:
+    def next_coords(self, x: int, y: int, steps: int = 1) -> tuple[int, int]:
         match self:
             case Direction.EAST:
-                return x + 1, y
+                return x + steps, y
             case Direction.WEST:
-                return x - 1, y
+                return x - steps, y
             case Direction.NORTH:
-                return x, y - 1
+                return x, y - steps
             case Direction.SOUTH:
-                return x, y + 1
+                return x, y + steps
             case _:
                 raise ValueError(f"Impossible, unsupported direction: {self}")
 
@@ -94,3 +94,13 @@ class Grid(Generic[T]):
 
     def value_at(self, x: int, y: int) -> T:
         return self.tiles[y][x]
+
+    @property
+    def tiles_iterator(self) -> Generator[T, None, None]:
+        for y in range(0, self.height):
+            for x in range(0, self.width):
+                yield self.value_at(x, y)
+
+    def print_grid(self, print_function: Callable[[T], str]):
+        for y in range(0, self.height):
+            print("".join(print_function(tile) for tile in self.tiles[y]))
