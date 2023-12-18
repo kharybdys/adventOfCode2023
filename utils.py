@@ -95,6 +95,12 @@ class Grid(Generic[T]):
     def value_at(self, x: int, y: int) -> T:
         return self.tiles[y][x]
 
+    def set_value_at(self, x: int, y: int, value: T):
+        if self.within_bounds(x, y):
+            self.tiles[y][x] = value
+        else:
+            raise KeyError(f"Invalid coordinates {x}, {y} for grid with width {self.width} and height {self.height}")
+
     @property
     def tiles_iterator(self) -> Generator[T, None, None]:
         for y in range(0, self.height):
