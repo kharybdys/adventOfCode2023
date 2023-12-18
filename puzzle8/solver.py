@@ -113,14 +113,16 @@ def reach_end(current_nodes: list[InstructedNode], nodes_dict: dict[str, Instruc
                     return min(intersected_can_finish_at) + current_iteration_start
         current_iteration_start += cycle_size
         current_nodes = [nodes_dict[node.end_node] for node in current_nodes]
-        if current_iteration_start % (cycle_size * 100) == 1:
-            print(f"At {current_iteration_start} at {datetime.datetime.now()}")
+        if current_iteration_start % (cycle_size * 100000) == 1:
+            print(f"At {current_iteration_start:,} at {datetime.datetime.now()}")
 
 
 def solve_b_with_instructions(puzzle_input: list[str]) -> None:
     print(puzzle_input)
     print(f"Started at {datetime.datetime.now()}")
     instructions = puzzle_input[0]
+    copies = 1000
+    instructions = "".join([instructions] * copies)
     if puzzle_input[1] != "":
         raise ValueError("Missing separation line between instructions and nodes in the input")
     nodes_list = [InstructedNode.from_string(line) for line in puzzle_input[2:]]
@@ -132,4 +134,4 @@ def solve_b_with_instructions(puzzle_input: list[str]) -> None:
 
 
 def solve_b(puzzle_input: list[str]) -> None:
-    solve_b_with_reduction_of_graph(puzzle_input)
+    solve_b_with_instructions(puzzle_input)
