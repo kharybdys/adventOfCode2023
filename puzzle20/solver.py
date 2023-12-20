@@ -1,6 +1,8 @@
 from collections import deque
 
-from puzzle20.modules import Module, parse_module, Pulse, OutputModule
+from puzzle20.modules import Module, parse_module, Pulse, OutputModule, WatcherModule
+
+DEBUG = False
 
 
 def parse(puzzle_input: list[str]) -> dict[str, Module]:
@@ -33,51 +35,44 @@ def send_pulse(initial_pulse: Pulse) -> tuple[int, int]:
             high_pulse_count += 1
         else:
             low_pulse_count += 1
-        print(f"Sending pulse from {pulse.source}, high? {pulse.high_pulse} to {pulse.destination.identifier}")
+        if DEBUG:
+            print(f"Sending pulse from {pulse.source}, high? {pulse.high_pulse} to {pulse.destination.identifier}")
         pulses.extend(pulse.process())
     return high_pulse_count, low_pulse_count
 
 
 def sum_low_high_pulse(pulse_tuples: list[tuple[int, int]]) -> tuple[int, int]:
-    print(f"{pulse_tuples}")
+    if DEBUG:
+        print(f"{pulse_tuples}")
     if pulse_tuples:
         return tuple(map(sum, zip(*pulse_tuples)))
     else:
         return 0, 0
 
 
-def count_pulses(max_cycle: int, puzzle_input: list[str]) -> tuple[int, int]:
-    modules_by_name = parse(puzzle_input)
+def count_pulses(max_cycle: int, modules_by_name: dict[str, Module]) -> tuple[int, int]:
     cycle_to_pulses: dict[int, tuple[int, int]] = {}
-    snapshot_to_cycle: dict[tuple[bool], int] = {}
     for cycle in range(0, max_cycle):
-        snapshot = tuple(module.status for module in modules_by_name.values())
-        if snapshot in snapshot_to_cycle:
-            # Short-circuit
-            previous_cycle = snapshot_to_cycle[snapshot]
-            start_high, start_low = sum_low_high_pulse([v for k, v in cycle_to_pulses.items() if k < previous_cycle])
-            sum_high, sum_low = sum_low_high_pulse([v for k, v in cycle_to_pulses.items() if previous_cycle <= k < cycle])
-            repeats_for, extra_steps = divmod(max_cycle - previous_cycle, cycle - previous_cycle)
-            extra_high, extra_low = sum_low_high_pulse([v for k, v in cycle_to_pulses.items() if previous_cycle <= k < previous_cycle + extra_steps])
-            print(f"{previous_cycle=}, {cycle=}")
-            print(f"{repeats_for=}, {extra_steps=}")
-            print(f"{start_high=}, {start_low=}")
-            print(f"{sum_high=}, {sum_low=}")
-            print(f"{extra_high=}, {extra_low=}")
-            return start_high + sum_high * repeats_for + extra_high, start_low + sum_low * repeats_for + extra_low
-        snapshot_to_cycle[snapshot] = cycle
-        print(f"Starting a cycle by pressing the button")
-        high_pulse_count, low_pulse_count = send_pulse(Pulse(high_pulse=False, source="button", destination=modules_by_name["broadcaster"]))
-        print(f"{high_pulse_count}, {low_pulse_count} after cycle {cycle}")
+        if DEBUG:
+            print(f"Starting a cycle by pressing the button")
+        elif cycle % 100000 == 0:
+            print(f"Starting cycle {cycle:,}")
+        high_pulse_count, low_pulse_count = send_pulse(Pulse(high_pulse=False, cycle=cycle, source="button", destination=modules_by_name["broadcaster"]))
+        if DEBUG:
+            print(f"{high_pulse_count}, {low_pulse_count} after cycle {cycle}")
         cycle_to_pulses[cycle] = high_pulse_count, low_pulse_count
     return sum_low_high_pulse(list(cycle_to_pulses.values()))
 
 
 def solve_a(puzzle_input: list[str]) -> None:
     print(puzzle_input)
-    high_pulse_count, low_pulse_count = count_pulses(1000, puzzle_input)
+    modules_by_name = parse(puzzle_input)
+    high_pulse_count, low_pulse_count = count_pulses(1000, modules_by_name)
     print(f"{high_pulse_count=}, {low_pulse_count=}, solution is {high_pulse_count * low_pulse_count}")
 
 
 def solve_b(puzzle_input: list[str]) -> None:
     print(puzzle_input)
+    modules_by_name = parse(puzzle_input)
+    modules_by_name["rx"] = WatcherModule(identifier="rx", destination_strings=[])
+    count_pulses(100000000000, modules_by_name)

@@ -6,11 +6,12 @@ from typing import Self, Generator
 @dataclass
 class Pulse:
     high_pulse: bool
+    cycle: int
     source: str
     destination: "Module"
 
     def process(self) -> Generator[Self, None, None]:
-        yield from self.destination.receive_pulse(self.high_pulse, self.source)
+        yield from self.destination.receive_pulse(self.high_pulse, self.cycle, self.source)
 
 
 class Module:
@@ -26,16 +27,23 @@ class Module:
     def register_receiver(self, module: Self):
         pass
 
-    def send_pulse(self, high_pulse: bool) -> Generator[Pulse, None, None]:
+    def send_pulse(self, cycle: int, high_pulse: bool) -> Generator[Pulse, None, None]:
         for dest in self.destinations:
-            yield Pulse(high_pulse, self.identifier, dest)
+            yield Pulse(high_pulse, cycle + 1, self.identifier, dest)
 
-    def receive_pulse(self, high_pulse: bool, source_identifier: str) -> Generator[Pulse, None, None]:
-        yield from self.send_pulse(high_pulse)
+    def receive_pulse(self, high_pulse: bool, cycle: int, source_identifier: str) -> Generator[Pulse, None, None]:
+        yield from self.send_pulse(cycle, high_pulse)
 
 
 class OutputModule(Module):
-    def send_pulse(self, high_pulse: bool) -> Generator[Pulse, None, None]:
+    def send_pulse(self, cycle: int, high_pulse: bool) -> Generator[Pulse, None, None]:
+        yield from ()
+
+
+class WatcherModule(Module):
+    def receive_pulse(self, high_pulse: bool, cycle: int, source_identifier: str) -> Generator[Pulse, None, None]:
+        if not high_pulse:
+            raise ValueError(f"Received the all-import low pulse at cycle {cycle}")
         yield from ()
 
 
@@ -48,12 +56,12 @@ class FlipFlopModule(Module):
     def status(self) -> bool:
         return self.on
 
-    def receive_pulse(self, high_pulse: bool, source_identifier: str) -> Generator[Pulse, None, None]:
+    def receive_pulse(self, high_pulse: bool, cycle: int, source_identifier: str) -> Generator[Pulse, None, None]:
         if high_pulse:
             pass
         else:
             self.on = not self.on
-            yield from self.send_pulse(self.on)
+            yield from self.send_pulse(cycle, self.on)
 
 
 class ConjunctionModule(Module):
@@ -64,9 +72,9 @@ class ConjunctionModule(Module):
     def register_receiver(self, module: Self):
         self.last_pulses[module.identifier] = False
 
-    def receive_pulse(self, high_pulse: bool, source_identifier: str) -> Generator[Pulse, None, None]:
+    def receive_pulse(self, high_pulse: bool, cycle: int, source_identifier: str) -> Generator[Pulse, None, None]:
         self.last_pulses[source_identifier] = high_pulse
-        yield from self.send_pulse(not all(self.last_pulses.values()))
+        yield from self.send_pulse(cycle, not all(self.last_pulses.values()))
 
 
 def parse_module(module_line: str) -> Module:
