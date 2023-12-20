@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
 from itertools import groupby
@@ -18,6 +19,25 @@ def split_in_groups_separated_by_empty_line(puzzle_input: list[str]) -> Generato
             yield lines
             lines = []
     yield lines
+
+
+@dataclass
+class Range:
+    start: int
+    stop: int
+
+    @cached_property
+    def size(self) -> int:
+        return self.stop - self.start
+
+    def within(self, value: int) -> bool:
+        return self.start <= value < self.stop
+
+    def before(self, value: int) -> bool:
+        return self.stop <= value
+
+    def after(self, value: int) -> bool:
+        return self.start > value
 
 
 class Direction(Enum):
