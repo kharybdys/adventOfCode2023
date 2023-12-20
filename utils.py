@@ -66,6 +66,34 @@ class Direction(Enum):
                 raise ValueError(f"Impossible, unsupported direction: {self}")
 
     @cached_property
+    def cw(self) -> Self:
+        match self:
+            case Direction.EAST:
+                return Direction.SOUTH
+            case Direction.SOUTH:
+                return Direction.WEST
+            case Direction.WEST:
+                return Direction.NORTH
+            case Direction.NORTH:
+                return Direction.EAST
+            case _:
+                raise ValueError(f"Impossible, unsupported direction: {self}")
+
+    @cached_property
+    def ccw(self) -> Self:
+        match self:
+            case Direction.EAST:
+                return Direction.NORTH
+            case Direction.NORTH:
+                return Direction.WEST
+            case Direction.WEST:
+                return Direction.SOUTH
+            case Direction.SOUTH:
+                return Direction.EAST
+            case _:
+                raise ValueError(f"Impossible, unsupported direction: {self}")
+
+    @cached_property
     def all_but_me(self) -> list[Self]:
         result = self.all()
         result.remove(self)

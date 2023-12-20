@@ -100,7 +100,13 @@ def find_duplicated_dig_instruction(dig_instructions: list[DigInstruction]) -> b
 
 def solve_dig_instructions_for_big_numbers(dig_instructions: list[DigInstruction]) -> int:
     confirmed_dug = 0
+    count_dig_instructions = len(dig_instructions) + 1
     while dig_instructions:
+        if len(dig_instructions) == count_dig_instructions:
+            print(f"Progress is stuck, confirmed_dug = {confirmed_dug}")
+            print(solve_dig_instructions(dig_instructions))
+            return -1
+        count_dig_instructions = len(dig_instructions)
         while find_duplicated_dig_instruction(dig_instructions):
             pass
         if DEBUG:
@@ -115,7 +121,7 @@ def solve_dig_instructions_for_big_numbers(dig_instructions: list[DigInstruction
                 prev = dig_instructions[i - 2]
                 curr = dig_instructions[i - 1]
                 nxt = dig_instructions[i]
-                if prev.direction.opposite == nxt.direction and curr.direction not in [prev.direction, nxt.direction]:
+                if prev.direction.opposite == nxt.direction and curr.direction == prev.direction.cw:
                     if DEBUG:
                         print(f"Found bulge, {prev=}, {curr=}, {nxt=}")
                     if prev.distance < nxt.distance:

@@ -15,10 +15,12 @@ import puzzle19
 import puzzle1a
 import puzzle1b
 import puzzle2
+import puzzle20
 import puzzle2021_24
 import puzzle2021_25
 import puzzle2022_11
 import puzzle2022_25
+import puzzle21
 import puzzle3
 import puzzle4
 import puzzle5
@@ -65,6 +67,10 @@ SOLVERS = {"1a": puzzle1a.solve,
            "18b": puzzle18.solve_b,
            "19a": puzzle19.solve_a,
            "19b": puzzle19.solve_b,
+           "20a": puzzle20.solve_a,
+           "20b": puzzle20.solve_b,
+           "21a": puzzle21.solve_a,
+           "21b": puzzle21.solve_b,
            "2021_24a": puzzle2021_24.solver.solve_a_too_slow,
            "2021_24b": puzzle2021_24.solve_b,
            "2021_25a": puzzle2021_25.solve_a,
