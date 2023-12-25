@@ -21,6 +21,10 @@ import puzzle2021_25
 import puzzle2022_11
 import puzzle2022_25
 import puzzle21
+import puzzle22
+import puzzle23
+import puzzle24
+import puzzle25
 import puzzle3
 import puzzle4
 import puzzle5
@@ -71,6 +75,14 @@ SOLVERS = {"1a": puzzle1a.solve,
            "20b": puzzle20.solve_b,
            "21a": puzzle21.solve_a,
            "21b": puzzle21.solve_b,
+           "22a": puzzle22.solve_a,
+           "22b": puzzle22.solve_b,
+           "23a": puzzle23.solve_a,
+           "23b": puzzle23.solve_b,
+           "24a": puzzle24.solve_a,
+           "24b": puzzle24.solve_b,
+           "25a": puzzle25.solve_a,
+           "25b": puzzle25.solve_b,
            "2021_24a": puzzle2021_24.solver.solve_a_too_slow,
            "2021_24b": puzzle2021_24.solve_b,
            "2021_25a": puzzle2021_25.solve_a,
@@ -82,7 +94,7 @@ SOLVERS = {"1a": puzzle1a.solve,
            }
 
 # I intend to manually change this for every puzzle
-DEFAULT_PUZZLE = "20b"
+DEFAULT_PUZZLE = "21a"
 EXAMPLE = False
 
 PUZZLE_NUMBER_PATTERN = re.compile(r"[\d_]+")

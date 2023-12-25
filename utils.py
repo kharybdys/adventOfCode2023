@@ -150,6 +150,12 @@ class Grid(Generic[T]):
             raise KeyError(f"Invalid coordinates {x}, {y} for grid with width {self.width} and height {self.height}")
 
     @property
+    def coords_iterator(self) -> Generator[tuple[int, int, T], None, None]:
+        for y in range(0, self.height):
+            for x in range(0, self.width):
+                yield x, y, self.value_at(x, y)
+
+    @property
     def tiles_iterator(self) -> Generator[T, None, None]:
         for y in range(0, self.height):
             for x in range(0, self.width):
