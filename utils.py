@@ -30,13 +30,13 @@ class Range:
     def size(self) -> int:
         return self.stop - self.start
 
-    def within(self, value: int) -> bool:
+    def within(self, value: float) -> bool:
         return self.start <= value < self.stop
 
-    def before(self, value: int) -> bool:
+    def before(self, value: float) -> bool:
         return self.stop <= value
 
-    def after(self, value: int) -> bool:
+    def after(self, value: float) -> bool:
         return self.start > value
 
 
