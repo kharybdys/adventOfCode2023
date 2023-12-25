@@ -5,6 +5,8 @@ from dataclasses import dataclass, field
 from functools import cached_property
 from typing import Generator, Self, ClassVar
 
+DEBUG = False
+
 Point3D = namedtuple("Point3D", ["x", "y", "z"])
 
 
@@ -68,18 +70,19 @@ def get_lower_bricks(bricks_per_min_z: dict[int, list[Brick]], max_z: int) -> Ge
             yield from bricks_per_min_z[z]
 
 
-def solve_a(puzzle_input: list[str]) -> None:
-    print(puzzle_input)
+def parse(puzzle_input: list[str]) -> dict[int, list[Brick]]:
     bricks_per_min_z = defaultdict(list)
-    brick_count = 0
     for ident, line in enumerate(puzzle_input):
         brick = Brick.from_line(ident, line)
         bricks_per_min_z[brick.min_z].append(brick)
-        brick_count += 1
+    return bricks_per_min_z
 
+
+def drop_down_and_determine_held_up_by(bricks_per_min_z: dict[int, list[Brick]]):
     # Do the dropping down but also fill the held_up_by
     for min_z in sorted(bricks_per_min_z.keys()):
-        print(f"Dropping down bricks at original min_z: {min_z}, length of bricks to check: {len(bricks_per_min_z[min_z])}")
+        if DEBUG:
+            print(f"Dropping down bricks at original min_z: {min_z}, length of bricks to check: {len(bricks_per_min_z[min_z])}")
         for brick in bricks_per_min_z[min_z].copy():
             bricks_per_min_z[min_z].remove(brick)
             dropped_down = True
@@ -96,21 +99,59 @@ def solve_a(puzzle_input: list[str]) -> None:
                 if dropped_down:
                     brick.start_z = brick.start_z - 1
                     brick.end_z = brick.end_z - 1
-            if brick.min_z < min_z:
-                print(f"Dropped down brick to {brick}")
-            else:
-                print(f"Cannot drop down {brick}")
+            if DEBUG:
+                if brick.min_z < min_z:
+                    print(f"Dropped down brick to {brick}")
+                else:
+                    print(f"Cannot drop down {brick}")
             bricks_per_min_z[brick.min_z].append(brick)
+    return bricks_per_min_z
 
-    non_removable_bricks: set[Brick] = set()
+
+def split_bricks_on_removable(bricks_per_min_z: dict[int, list[Brick]]) -> tuple[set[Brick], set[Brick], set[Brick]]:
+    all_bricks = set()
+    non_removable_bricks = set()
     for min_z in sorted(bricks_per_min_z.keys()):
-        print(f"Listing bricks at min_z {min_z}")
+        if DEBUG:
+            print(f"Listing bricks at min_z {min_z}")
         for brick in bricks_per_min_z[min_z]:
-            print(f"{brick}")
+            if DEBUG:
+                print(f"{brick}")
+            all_bricks.add(brick)
             if len(brick.held_up_by) == 1:
                 non_removable_bricks.update(brick.held_up_by)
-    print(str(brick_count - len(non_removable_bricks)))
+    return all_bricks, all_bricks - non_removable_bricks, non_removable_bricks
+
+
+def solve_a(puzzle_input: list[str]) -> None:
+    print(puzzle_input)
+    bricks_per_min_z = parse(puzzle_input)
+
+    bricks_per_min_z = drop_down_and_determine_held_up_by(bricks_per_min_z)
+
+    _, removable_bricks, _ = split_bricks_on_removable(bricks_per_min_z)
+    print(len(removable_bricks))
 
 
 def solve_b(puzzle_input: list[str]) -> None:
     print(puzzle_input)
+    bricks_per_min_z = parse(puzzle_input)
+
+    bricks_per_min_z = drop_down_and_determine_held_up_by(bricks_per_min_z)
+
+    all_bricks, _, non_removable_bricks = split_bricks_on_removable(bricks_per_min_z)
+    print(f"Got {len(non_removable_bricks)} non_removable_bricks to check")
+    solution = 0
+    for start_brick in non_removable_bricks:
+        removed_bricks: set[Brick] = set()
+        removed_bricks.add(start_brick)
+        new_collapses = True
+        while new_collapses:
+            new_collapses = False
+            for brick in all_bricks - removed_bricks:
+                if brick.held_up_by and brick.held_up_by.issubset(removed_bricks):
+                    removed_bricks.add(brick)
+                    new_collapses = True
+        print(f"Removing brick {start_brick} results in a chain reaction of {len(removed_bricks) - 1}")
+        solution += len(removed_bricks) - 1
+    print(solution)
