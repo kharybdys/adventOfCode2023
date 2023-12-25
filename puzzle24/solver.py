@@ -1,7 +1,7 @@
 import re
 
 from dataclasses import dataclass
-from itertools import combinations, permutations
+from itertools import combinations
 from typing import Self, ClassVar
 
 from utils import Range
@@ -138,18 +138,24 @@ def solve_b(puzzle_input: list[str], example: bool) -> None:
     if example:
         LIMIT = 10
     else:
-        LIMIT = 50000
+        LIMIT = 500000000000000
     print(puzzle_input)
     hailstones = [Hail.from_line(line) for line in puzzle_input]
     h0 = hailstones[0]
     h1 = hailstones[1]
     h2 = hailstones[2]
-    for t0, t1, t2 in permutations(range(0, LIMIT), 3):
-        # For t0 to t2, see if the points that the three hailstones are on at that time are on one line
-        p0 = h0.coords_at(t0)
-        p1 = h1.coords_at(t1)
-        p2 = h2.coords_at(t2)
-        a = p0 - p1
-        b = p0 - p2
-        if two_vectors_parallel(a, b):
-            print(f"Solution: {t0=}, {t1=}, {t2=}")
+    attempts = 0
+    for t0 in range(0, LIMIT):
+        for t1 in range(0, LIMIT):
+            for t2 in range(0, LIMIT):
+                # For t0 to t2, see if the points that the three hailstones are on at that time are on one line
+                p0 = h0.coords_at(t0)
+                p1 = h1.coords_at(t1)
+                p2 = h2.coords_at(t2)
+                a = p0 - p1
+                b = p0 - p2
+                if two_vectors_parallel(a, b):
+                    print(f"Solution: {t0=}, {t1=}, {t2=}")
+                attempts += 1
+                if attempts % 100000 == 0:
+                    print(f"Attempts is {attempts:,}")
