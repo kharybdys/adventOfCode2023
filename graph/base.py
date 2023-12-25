@@ -8,6 +8,17 @@ class Vertex:
         self.edges: list["Edge"] = []
         self.coords = (x, y)
 
+    def add_unidirectional_edge(self, other_vertex: Self, weight: int):
+        if not any(edge.end_vertex == other_vertex for edge in self.edges):
+            new_edge = Edge(start_vertex=self, end_vertex=other_vertex, weight=weight)
+            self.edges.append(new_edge)
+
+    def add_bidirectional_edge(self, other_vertex: Self, weight: int):
+        if not any(edge.between(self, other_vertex) for edge in self.edges):
+            new_edge = Edge(start_vertex=self, end_vertex=other_vertex, weight=weight)
+            self.edges.append(new_edge)
+            other_vertex.edges.append(~new_edge)
+
     def __repr__(self) -> str:
         return f"Vertex(id={self.ident}, coords={self.coords}, edges: {self.edges})"
 
@@ -26,6 +37,9 @@ class Edge:
     start_vertex: Vertex
     end_vertex: Vertex
     weight: int
+
+    def between(self, v1: Vertex, v2: Vertex) -> bool:
+        return (v1 == self.start_vertex and v2 == self.end_vertex) or (v1 == self.end_vertex and v2 == self.start_vertex)
 
     def __repr__(self) -> str:
         return f"Edge(start={self.start_vertex.ident}, end={self.end_vertex.ident}, weight={self.weight})"
@@ -50,3 +64,9 @@ class VertexPath:
                 new_visited.add(self.current_vertex)
                 return VertexPath(current_vertex=vertex, length=self.length + edge.weight, visited=new_visited)
         raise ValueError(f"No path from {self.current_vertex} to {vertex}")
+
+
+def print_graph(vertices: list[Vertex]):
+    for vertex in vertices:
+        edge_info = ", ".join(f"{edge.start_vertex.ident if edge.end_vertex == vertex else edge.end_vertex.ident}: {edge.weight}" for edge in vertex.edges)
+        print(f"{vertex.ident}: {edge_info}")
