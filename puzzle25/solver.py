@@ -1,10 +1,9 @@
 import re
 from collections import deque
 from itertools import combinations
-from pathlib import Path
 from typing import Generator
 
-from graph.base import Vertex, Edge
+from graph.base import Vertex, Edge, print_graph
 
 
 def parse(puzzle_input: list[str]) -> list[Vertex]:
@@ -52,13 +51,16 @@ def generate_connected_vertices(edges: set[Edge]) -> Generator[list[Vertex], Non
 
 
 def solve_a(puzzle_input: list[str]) -> None:
-    # Disconnect 3 wires
+    # Far too naive
+    attempts = 0
     print(puzzle_input)
     vertices = parse(puzzle_input)
+    print_graph(vertices)
     edges: set[Edge] = set()
     for vertex in vertices:
         edges.update(vertex.edges)
     for e1, e2, e3 in combinations(edges, 3):
+        # Disconnect 3 wires
         # Remove e1, e2, e3 and check connectiveness
         new_edges = edges.copy()
         new_edges.difference_update({e1, e2, e3})
@@ -66,19 +68,11 @@ def solve_a(puzzle_input: list[str]) -> None:
         if len(connected_vertices) == 2:
             lengths = [len(conn) for conn in connected_vertices]
             print(f"{lengths=}, {lengths[0] * lengths[1]}")
+        attempts += 1
+        if attempts % 100 == 0:
+            print(f"Attempts: {attempts:,}")
 
 
 def solve_b(puzzle_input: list[str]) -> None:
     print(puzzle_input)
     print("No Part Two on day 25")
-
-
-def read_file() -> list[str]:
-    data_dir = Path(__file__).parent.parent / "data"
-
-    with open(data_dir / f"input25.txt", "rt") as file:
-        return [line.rstrip() for line in file]
-
-
-if __name__ == "__main__":
-    solve_a(read_file())
