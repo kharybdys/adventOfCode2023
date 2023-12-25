@@ -145,13 +145,13 @@ def ignore_certain_chars_converter(char: str, converter: Callable[[str], T]) -> 
             return converter(char)
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     grid: TileGrid = Grid.from_lines(puzzle_input, lambda c: ignore_certain_chars_converter(c, TileStatus.from_char))
     print(f"Found max path with length {solve_for_grid(grid)}")
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     grid: FreeTileGrid = Grid.from_lines(puzzle_input, lambda c: ignore_certain_chars_converter(c, FreeTileStatus.from_char))
     print(f"Found max path with length {solve_for_grid(grid)}")

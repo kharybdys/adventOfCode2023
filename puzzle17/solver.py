@@ -102,7 +102,7 @@ def find_minimal_path(grid: IntGrid, first_attempt: Attempt) -> int:
     return best_cost
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     grid = Grid.from_lines(puzzle_input, int)
     print(find_minimal_path(grid=grid,
@@ -118,5 +118,5 @@ def solve_a(puzzle_input: list[str]) -> None:
                             ))
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)

@@ -42,7 +42,7 @@ def parse(puzzle_input: list[str], watcher: Watcher) -> tuple[Node, list[Part]]:
     return root_node, parts
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     watcher = Watcher()
     root_node, parts = parse(puzzle_input, watcher)
@@ -54,7 +54,7 @@ def solve_a(puzzle_input: list[str]) -> None:
     print(solution)
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     watcher = Watcher()
     root_node, parts = parse(puzzle_input, watcher)

@@ -23,14 +23,14 @@ def read_expected_output_for_example() -> Generator[tuple[int, SeaFloor], None, 
                     puzzle_input.append(line)
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     moved = True
     steps = 0
     sea_floor = SeaFloor.parse(puzzle_input)
     sea_floor.print()
 
-    expected_output_for_example = {step: floor for step, floor in read_expected_output_for_example()}
+    expected_output_for_example = {step: floor for step, floor in read_expected_output_for_example()} if example else {}
     print(expected_output_for_example)
     while moved:
         moved = sea_floor.move()
@@ -39,11 +39,11 @@ def solve_a(puzzle_input: list[str]) -> None:
         print(f"At step {steps}, {moved=}")
         sea_floor.print()
 
-        if steps in expected_output_for_example:
+        if example and steps in expected_output_for_example:
             print(f"MMAARRTTEE: expected_output_for_example matches: {expected_output_for_example[steps] == sea_floor}")
     print("")
     print(f"Steps: {steps}")
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)

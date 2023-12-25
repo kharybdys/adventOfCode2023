@@ -10,7 +10,7 @@ def my_hash(string: str) -> int:
     return result
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     print(sum(my_hash(string) for string in puzzle_input[0].split(",")))
 
@@ -34,7 +34,7 @@ class LensBox:
         return result
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     REMOVE_PATTERN = re.compile(r"([a-z]+)-")
     ADD_PATTERN = re.compile(r"([a-z]+)=(\d)")
     print(puzzle_input)

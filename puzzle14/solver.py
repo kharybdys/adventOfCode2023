@@ -1,7 +1,7 @@
 from puzzle14.dish import Dish, RockStatus
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     dish = Dish.from_lines(puzzle_input)
     dish.print_dish()
@@ -30,7 +30,7 @@ def run_cycles(dish: Dish, cycles: int) -> int:
     return dish.total_load_north()
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     CYCLES = 1000000000
     dish = Dish.from_lines(puzzle_input)

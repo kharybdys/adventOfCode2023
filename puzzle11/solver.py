@@ -68,7 +68,7 @@ def print_galaxies(galaxies: Iterable[Galaxy]):
         print("".join(map(lambda g: str(g.id) if g else ".", line)))
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     galaxies = list(expand_galaxies(generate_galaxies(puzzle_input), 2))
     print_galaxies(galaxies)
@@ -80,7 +80,7 @@ def solve_a(puzzle_input: list[str]) -> None:
     print(solution)
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     galaxies = list(expand_galaxies(generate_galaxies(puzzle_input), 1000000))
     solution = 0

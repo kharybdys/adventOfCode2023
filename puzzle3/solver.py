@@ -32,7 +32,7 @@ def generate_part_numbers(puzzle_input: list[str]) -> Generator[int, None, None]
                 print(f"Number {match[0]} is not a part number at line {line}")
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     solution = sum(generate_part_numbers(puzzle_input))
     print(solution)
@@ -60,7 +60,7 @@ def generate_gear_numbers(puzzle_input: list[str]) -> Generator[tuple[int, int, 
                 yield int(match[0]), symb_x, symb_y
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     gears_by_coords: dict[tuple[int, int], list[int]] = defaultdict(list)
     for gear, x, y in generate_gear_numbers(puzzle_input):

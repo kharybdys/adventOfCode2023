@@ -24,7 +24,7 @@ def get_start_coord(grid: TileGrid) -> tuple[int, int]:
             return x, y
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     grid: TileGrid = Grid.from_lines(puzzle_input, TileStatus.from_char)
     coords: set = set()
@@ -74,14 +74,13 @@ def calculate_valid_targets(start_x: int, start_y: int, grid: TileGrid, step: in
     return solution
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
-    target_step = 26501365 + 1
+    steps_to_check = [6, 10, 50, 100, 500, 1000, 5000] if example else [26501365]
     # Need to check target_step * target_step options, centered on start_x, start_y
     grid: TileGrid = Grid.from_lines(puzzle_input, TileStatus.from_char)
     start_x, start_y = get_start_coord(grid)
     # Approach might still be too slow
     # More importantly, counting too many since some squares will not have been reachable due to a rock on an earlier step
-    print(calculate_valid_targets(start_x, start_y, grid, step=target_step))
-    for step in range(0, 6):
-        print(f"{step=}: {calculate_valid_targets(start_x, start_y, grid, step=step)}")
+    for step in steps_to_check:
+        print(f"{step=}: {calculate_valid_targets(start_x, start_y, grid, step=step + 1)}")

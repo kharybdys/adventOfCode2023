@@ -12,7 +12,7 @@ def expected_output(example: bool, postfix: str = "") -> list[str]:
         return [line.strip() for line in file]
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     logger = LogStreamer()
     monkeys: dict[int, Monkey] = parse_puzzle_lines(puzzle_input, logger, Monkey)
@@ -33,14 +33,15 @@ def solve_a(puzzle_input: list[str]) -> None:
             for monkey in monkeys.values():
                 monkey.report_items()
             logger.log("")
-    for log_line, expected_line in zip(logger.log_lines, expected_output(True)):
-        if log_line != expected_line:
-            print(f"Mismatch, {expected_line=}, {log_line=}")
+    if example:
+        for log_line, expected_line in zip(logger.log_lines, expected_output(example)):
+            if log_line != expected_line:
+                print(f"Mismatch, {expected_line=}, {log_line=}")
     items_inspected = sorted([monkey.items_inspected for monkey in monkeys.values()], reverse=True)
     print(str(items_inspected[0] * items_inspected[1]))
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     log_at = [1, 20, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
     logger = LogStreamer()
@@ -60,8 +61,9 @@ def solve_b(puzzle_input: list[str]) -> None:
             for monkey in monkeys.values():
                 monkey.report_inspections()
             logger.log("")
-    for log_line, expected_line in zip(logger.log_lines, expected_output(True, postfix="_b")):
-        if log_line != expected_line:
-            print(f"Mismatch, {expected_line=}, {log_line=}")
+    if example:
+        for log_line, expected_line in zip(logger.log_lines, expected_output(example, postfix="_b")):
+            if log_line != expected_line:
+                print(f"Mismatch, {expected_line=}, {log_line=}")
     items_inspected = sorted([monkey.items_inspected for monkey in monkeys.values()], reverse=True)
     print(str(items_inspected[0] * items_inspected[1]))

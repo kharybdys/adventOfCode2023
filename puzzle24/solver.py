@@ -121,19 +121,24 @@ def two_vectors_parallel(a: Point3D, b: Point3D) -> bool:
     return a.cross(b) == Point3D(0, 0, 0)
 
 
-def solve_a(puzzle_input: list[str]) -> None:
-    x_range = Range(start=200000000000000, stop=400000000000000 + 1)
-    y_range = Range(start=200000000000000, stop=400000000000000 + 1)
-    # x_range = Range(start=7, stop=27 + 1)
-    # y_range = Range(start=7, stop=27 + 1)
+def solve_a(puzzle_input: list[str], example: bool) -> None:
+    if example:
+        x_range = Range(start=7, stop=27 + 1)
+        y_range = Range(start=7, stop=27 + 1)
+    else:
+        x_range = Range(start=200000000000000, stop=400000000000000 + 1)
+        y_range = Range(start=200000000000000, stop=400000000000000 + 1)
     print(puzzle_input)
     hailstones = [Hail.from_line(line) for line in puzzle_input]
     solution = count_intersections(x_range, y_range, hailstones)
     print(solution)
 
 
-def solve_b(puzzle_input: list[str]) -> None:
-    LIMIT = 10
+def solve_b(puzzle_input: list[str], example: bool) -> None:
+    if example:
+        LIMIT = 10
+    else:
+        LIMIT = 50000
     print(puzzle_input)
     hailstones = [Hail.from_line(line) for line in puzzle_input]
     h0 = hailstones[0]

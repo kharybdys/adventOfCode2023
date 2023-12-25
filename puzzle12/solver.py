@@ -76,7 +76,7 @@ def parse_line(line: str, multiplier: int) -> tuple[list[str], list[int]]:
     return parts, pattern
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     solution = 0
     for line in puzzle_input:
@@ -88,7 +88,7 @@ def solve_a(puzzle_input: list[str]) -> None:
 
 
 # TODO: Solution is far too slow with the increased input.
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     solution = 0
     for line in puzzle_input:

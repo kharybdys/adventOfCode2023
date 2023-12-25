@@ -50,7 +50,7 @@ def generate_connected_vertices(edges: set[Edge]) -> Generator[list[Vertex], Non
     yield from generate_connected_vertices(edges)
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     # Far too naive
     attempts = 0
     print(puzzle_input)
@@ -73,6 +73,6 @@ def solve_a(puzzle_input: list[str]) -> None:
             print(f"Attempts: {attempts:,}")
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     print("No Part Two on day 25")

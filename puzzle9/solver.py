@@ -26,13 +26,13 @@ def line_to_elements(line: str) -> list[int]:
     return list(map(int, line.split()))
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     solution = sum(calculate_next_element(line_to_elements(line)) for line in puzzle_input)
     print(solution)
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     solution = sum(calculate_previous_element(line_to_elements(line)) for line in puzzle_input)
     print(solution)

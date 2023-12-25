@@ -112,7 +112,7 @@ class JokerHand(Hand):
                 return HandType.FIVE_OF_A_KIND
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     solution = 0
     for i, hand in enumerate(sorted([Hand.from_string(line) for line in puzzle_input]), start=1):
@@ -121,7 +121,7 @@ def solve_a(puzzle_input: list[str]) -> None:
     print(solution)
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     solution = 0
     for i, hand in enumerate(sorted([JokerHand.from_string(line) for line in puzzle_input]), start=1):

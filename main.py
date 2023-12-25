@@ -114,7 +114,7 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--puzzle", default=DEFAULT_PUZZLE)
     args = parser.parse_args()
     if args.puzzle in SOLVERS:
-        SOLVERS[args.puzzle](load_input(args.puzzle))
+        SOLVERS[args.puzzle](load_input(args.puzzle), EXAMPLE)
     else:
         raise NotImplementedError(f"No support for puzzle {args.puzzle}")
 

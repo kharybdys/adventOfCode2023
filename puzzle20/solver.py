@@ -64,14 +64,14 @@ def count_pulses(max_cycle: int, modules_by_name: dict[str, Module]) -> tuple[in
     return sum_low_high_pulse(list(cycle_to_pulses.values()))
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     modules_by_name = parse(puzzle_input)
     high_pulse_count, low_pulse_count = count_pulses(1000, modules_by_name)
     print(f"{high_pulse_count=}, {low_pulse_count=}, solution is {high_pulse_count * low_pulse_count}")
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     modules_by_name = parse(puzzle_input)
     modules_by_name["rx"] = WatcherModule(identifier="rx", destination_strings=[])

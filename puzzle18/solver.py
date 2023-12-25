@@ -193,13 +193,13 @@ def parse(puzzle_input: list[str]) -> Generator[DigInstruction, None, None]:
             raise ValueError(f"Invalid line {line}")
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     dig_instructions = list(parse(puzzle_input))
     print(solve_dig_instructions_for_big_numbers(dig_instructions))
 
 
-def solve_b_naive(puzzle_input: list[str]) -> None:
+def solve_b_naive(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     dig_instructions = list(parse(puzzle_input))
     for dig_instruction in dig_instructions:
@@ -207,7 +207,7 @@ def solve_b_naive(puzzle_input: list[str]) -> None:
     print(solve_dig_instructions_for_big_numbers(dig_instructions))
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     dig_instructions = list(parse(puzzle_input))
     for dig_instruction in dig_instructions:

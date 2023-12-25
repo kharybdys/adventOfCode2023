@@ -32,7 +32,7 @@ def diff_two_lines(l1: str, l2: str) -> int:
     return sum(1 for a, b in zip(l1, l2) if a != b)
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     solution = 0
     for lines in split_in_groups_separated_by_empty_line(puzzle_input):
@@ -45,7 +45,7 @@ def solve_a(puzzle_input: list[str]) -> None:
     print(solution)
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     solution = 0
     for lines in split_in_groups_separated_by_empty_line(puzzle_input):

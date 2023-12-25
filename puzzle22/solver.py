@@ -123,7 +123,7 @@ def split_bricks_on_removable(bricks_per_min_z: dict[int, list[Brick]]) -> tuple
     return all_bricks, all_bricks - non_removable_bricks, non_removable_bricks
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     bricks_per_min_z = parse(puzzle_input)
 
@@ -133,7 +133,7 @@ def solve_a(puzzle_input: list[str]) -> None:
     print(len(removable_bricks))
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     bricks_per_min_z = parse(puzzle_input)
 

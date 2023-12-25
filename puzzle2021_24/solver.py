@@ -77,7 +77,7 @@ def merge_solutions(old_solutions: dict[int, PartialSolution], new_solutions: di
     return result
 
 
-def solve_a_too_slow(puzzle_input: list[str]) -> None:
+def solve_a_too_slow(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     t0 = time.time()
     print(f"Started at {datetime.datetime.now()}")
@@ -94,11 +94,11 @@ def solve_a_too_slow(puzzle_input: list[str]) -> None:
     print(f"Solution: {solution.partial_id}")
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
 
 

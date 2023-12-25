@@ -22,7 +22,7 @@ def print_grid_and_beams(grid: GridWithTileStatus, beams_by_coords: dict[tuple[i
         print("".join(print_char_at(x, y) for x in range(0, grid.width)))
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     grid = Grid.from_lines(puzzle_input, TileStatus.from_char)
     beams_by_coords = generate_beams_by_coords(grid, Beam(0, 0, Direction.WEST))
@@ -41,7 +41,7 @@ def calculate_energization_for_all_options(grid: Grid) -> Generator[int, None, N
         yield len(beams_by_coords.keys())
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     grid = Grid.from_lines(puzzle_input, TileStatus.from_char)
     print(max(calculate_energization_for_all_options(grid)))

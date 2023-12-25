@@ -56,7 +56,7 @@ class Attempt:
             raise ValueError(f"Cannot compare Attempts with other objects: {other}")
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     instructions = puzzle_input[0]
     if puzzle_input[1] != "":
@@ -69,7 +69,7 @@ def solve_a(puzzle_input: list[str]) -> None:
     print(attempt.lowest_steps())
 
 
-def solve_b_with_reduction_of_graph(puzzle_input: list[str]) -> None:
+def solve_b_with_reduction_of_graph(puzzle_input: list[str], example: bool) -> None:
     # Constraint on the solution, arbitrarily chosen. Should be much bigger
     MAX_PATH_LENGTH = 2000
 
@@ -117,11 +117,11 @@ def reach_end(current_nodes: list[InstructedNode], nodes_dict: dict[str, Instruc
             print(f"At {current_iteration_start:,} at {datetime.datetime.now()}")
 
 
-def solve_b_with_instructions(puzzle_input: list[str]) -> None:
+def solve_b_with_instructions(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     print(f"Started at {datetime.datetime.now()}")
     instructions = puzzle_input[0]
-    copies = 1000
+    copies = 1 if example else 1000
     instructions = "".join([instructions] * copies)
     if puzzle_input[1] != "":
         raise ValueError("Missing separation line between instructions and nodes in the input")
@@ -133,5 +133,5 @@ def solve_b_with_instructions(puzzle_input: list[str]) -> None:
     print(reach_end(current_nodes, nodes_dict, len(instructions)))
 
 
-def solve_b(puzzle_input: list[str]) -> None:
-    solve_b_with_instructions(puzzle_input)
+def solve_b(puzzle_input: list[str], example: bool) -> None:
+    solve_b_with_instructions(puzzle_input, example)

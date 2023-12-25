@@ -48,7 +48,7 @@ def steps_furthest_loop(board: Board) -> int:
     return max(s.step for s in loop.values())
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     board = Board.from_lines(puzzle_input)
     board.print()
@@ -58,7 +58,7 @@ def solve_a(puzzle_input: list[str]) -> None:
     print(steps_furthest_loop(board))
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     board = Board.from_lines(puzzle_input)
     board.print()

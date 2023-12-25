@@ -36,14 +36,14 @@ class Card:
             return 0
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     cards = [Card.from_line(line) for line in puzzle_input]
     solution = sum(card.power_value() for card in cards)
     print(solution)
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     cards = [Card.from_line(line) for line in puzzle_input]
     card_count: dict[int, int] = defaultdict(lambda: 1)

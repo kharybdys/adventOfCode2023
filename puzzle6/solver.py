@@ -67,7 +67,7 @@ def parse_ignore_spaces(puzzle_input: list[str]) -> tuple[int, int]:
     return time, distance
 
 
-def solve_a(puzzle_input: list[str]) -> None:
+def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     solution = prod(ways_to_win_with_log(time, distance) for time, distance in parse(puzzle_input))
     # time 53, distance 275: 6 * 47 to 47 * 6 = 42 options
@@ -76,7 +76,7 @@ def solve_a(puzzle_input: list[str]) -> None:
     print(solution)
 
 
-def solve_b(puzzle_input: list[str]) -> None:
+def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     solution = ways_to_win_with_log(*parse_ignore_spaces(puzzle_input))
     print(solution)
