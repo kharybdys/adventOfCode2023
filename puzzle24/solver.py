@@ -1,41 +1,93 @@
 import re
 
 from dataclasses import dataclass
-from itertools import combinations
-from pathlib import Path
+from itertools import combinations, permutations
 from typing import Self, ClassVar
 
 from utils import Range
 
 
+@dataclass(eq=True)
+class Point3D:
+    x: float
+    y: float
+    z: float
+
+    def __truediv__(self, other) -> Self:
+        if isinstance(other, (float, int)):
+            return Point3D(x=self.x / other,
+                           y=self.y / other,
+                           z=self.z / other
+                           )
+        raise ValueError(f"Cannot (true)divide by a non-scalar {other}")
+
+    def __mul__(self, other) -> Self:
+        if isinstance(other, (float, int)):
+            return Point3D(x=self.x * other,
+                           y=self.y * other,
+                           z=self.z * other
+                           )
+        raise ValueError(f"Cannot multiply by a non-scalar {other}")
+
+    def __sub__(self, other: Self) -> Self:
+        if isinstance(other, Point3D):
+            return Point3D(x=other.x - self.x,
+                           y=other.y - self.y,
+                           z=other.z - self.z
+                           )
+        else:
+            raise ValueError(f"Cannot subtract by {other}")
+
+    def __add__(self, other: Self) -> Self:
+        if isinstance(other, Point3D):
+            return Point3D(x=other.x + self.x,
+                           y=other.y + self.y,
+                           z=other.z + self.z
+                           )
+        else:
+            raise ValueError(f"Cannot subtract by {other}")
+
+    def cross(self, other: Self) -> Self:
+        if isinstance(other, Point3D):
+            return Point3D(x=self.y * other.z - self.z * other.y,
+                           y=self.z * other.x - self.x * other.z,
+                           z=self.x * other.y - self.y * other.x
+                           )
+        else:
+            raise ValueError(f"Cannot cross with {other}")
+
+
 @dataclass(repr=True)
 class Hail:
-    x: int
-    y: int
-    z: int
-    delta_x: int
-    delta_y: int
-    delta_z: int
+    initial: Point3D
+    delta: Point3D
 
     PATTERN: ClassVar[re.Pattern] = re.compile(r"(-?\d+),\s+(-?\d+),\s+(-?\d+)\s+@\s+(-?\d+),\s+(-?\d+),\s+(-?\d+)")
+
+    def coords_at(self, t: int) -> Point3D:
+        return self.initial + self.delta * t
 
     def line_xy(self) -> tuple[float, float]:
         """
         Returns a and b such that y = ax + b
         """
-        b = self.y - self.delta_y * (self.x / float(self.delta_x))
-        a = (self.y - b) / float(self.x)
+        b = self.initial.y - self.delta.y * (self.initial.x / float(self.delta.x))
+        a = (self.initial.y - b) / float(self.initial.x)
         return a, b
 
     @staticmethod
     def from_line(line: str) -> Self:
         if match := Hail.PATTERN.fullmatch(line):
-            return Hail(x=int(match[1]),
-                        y=int(match[2]),
-                        z=int(match[3]),
-                        delta_x=int(match[4]),
-                        delta_y=int(match[5]),
-                        delta_z=int(match[6]),
+            initial = Point3D(x=int(match[1]),
+                              y=int(match[2]),
+                              z=int(match[3])
+                              )
+            delta = Point3D(x=int(match[4]),
+                            y=int(match[5]),
+                            z=int(match[6])
+                            )
+            return Hail(initial=initial,
+                        delta=delta
                         )
         else:
             raise ValueError(f"Invalid hail definition {line}")
@@ -49,8 +101,8 @@ def check_intersection_without_z(h1: Hail, h2: Hail) -> tuple[bool, float, float
     else:
         x = (h2_b - h1_b) / float(h1_a - h2_a)
         y = h1_a * x + h1_b
-        t1 = (x - h1.x) / float(h1.delta_x)
-        t2 = (x - h2.x) / float(h2.delta_x)
+        t1 = (x - h1.initial.x) / float(h1.delta.x)
+        t2 = (x - h2.initial.x) / float(h2.delta.x)
         return True, x, y, t1, t2
 
 
@@ -65,6 +117,10 @@ def count_intersections(x_range: Range, y_range: Range, hailstones: list[Hail]) 
     return solution
 
 
+def two_vectors_parallel(a: Point3D, b: Point3D) -> bool:
+    return a.cross(b) == Point3D(0, 0, 0)
+
+
 def solve_a(puzzle_input: list[str]) -> None:
     x_range = Range(start=200000000000000, stop=400000000000000 + 1)
     y_range = Range(start=200000000000000, stop=400000000000000 + 1)
@@ -77,15 +133,18 @@ def solve_a(puzzle_input: list[str]) -> None:
 
 
 def solve_b(puzzle_input: list[str]) -> None:
+    LIMIT = 10
     print(puzzle_input)
-
-
-def read_file() -> list[str]:
-    data_dir = Path(__file__).parent.parent / "data"
-
-    with open(data_dir / f"input24.txt", "rt") as file:
-        return [line.rstrip() for line in file]
-
-
-if __name__ == "__main__":
-    solve_a(read_file())
+    hailstones = [Hail.from_line(line) for line in puzzle_input]
+    h0 = hailstones[0]
+    h1 = hailstones[1]
+    h2 = hailstones[2]
+    for t0, t1, t2 in permutations(range(0, LIMIT), 3):
+        # For t0 to t2, see if the points that the three hailstones are on at that time are on one line
+        p0 = h0.coords_at(t0)
+        p1 = h1.coords_at(t1)
+        p2 = h2.coords_at(t2)
+        a = p0 - p1
+        b = p0 - p2
+        if two_vectors_parallel(a, b):
+            print(f"Solution: {t0=}, {t1=}, {t2=}")
