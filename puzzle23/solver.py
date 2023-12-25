@@ -126,7 +126,7 @@ def generate_graph(start_vertex: Vertex, grid: TileGrid) -> list[Vertex]:
             if (x, y) in vertices:
                 new_vertex = vertices[(x, y)]
             else:
-                new_vertex = Vertex(current_ident, x, y)
+                new_vertex = Vertex(str(current_ident), x, y)
                 vertices[new_vertex.coords] = new_vertex
                 current_ident += 1
                 for direction in allowed_exits:
@@ -135,7 +135,7 @@ def generate_graph(start_vertex: Vertex, grid: TileGrid) -> list[Vertex]:
             vertex.edges.append(new_edge)
             new_vertex.edges.append(~new_edge)
         else:
-            new_vertex = Vertex(current_ident, x, y)
+            new_vertex = Vertex(str(current_ident), x, y)
             vertices[new_vertex.coords] = new_vertex
             current_ident += 1
             new_edge = Edge(start_vertex=vertex, end_vertex=new_vertex, weight=len(visited_coords))
@@ -163,7 +163,7 @@ def solve_b(puzzle_input: list[str]) -> None:
     for x in range(0, grid.width):
         if grid.value_at(x, 0).can_move_to:
             start_x = x
-    start_vertex = Vertex(ident=0, x=start_x, y=0)
+    start_vertex = Vertex(ident="0", x=start_x, y=0)
     vertices = generate_graph(start_vertex, grid)
     print(f"Graph generated, {vertices=}")
     solution = max(find_all_paths_graph(VertexPath(current_vertex=start_vertex), target_y=grid.height - 1), key=lambda p: p.length)

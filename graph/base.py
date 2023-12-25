@@ -3,7 +3,7 @@ from typing import Self
 
 
 class Vertex:
-    def __init__(self, ident: int, x: int, y: int):
+    def __init__(self, ident: str, x: int, y: int):
         self.ident = ident
         self.edges: list["Edge"] = []
         self.coords = (x, y)
@@ -32,6 +32,9 @@ class Edge:
 
     def __invert__(self) -> Self:
         return Edge(start_vertex=self.end_vertex, end_vertex=self.start_vertex, weight=self.weight)
+
+    def __hash__(self):
+        return hash((self.start_vertex, self.end_vertex, self.weight))
 
 
 @dataclass
