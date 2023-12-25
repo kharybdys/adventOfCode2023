@@ -1,9 +1,7 @@
 from collections import deque, defaultdict
 from dataclasses import dataclass
-from enum import Enum
-from typing import Self
 
-from utils import Direction, Grid
+from utils import Direction, Grid, PrintEnum
 
 DEBUG = False
 
@@ -15,18 +13,12 @@ class Beam:
     entry: Direction
 
 
-class TileStatus(Enum):
+class TileStatus(PrintEnum):
     EMPTY = "EMPTY", "."
     MIRROR_TOPLEFT = "MIRROR_TOPLEFT", "\\"
     MIRROR_TOPRIGHT = "MIRROR_TOPRIGHT", "/"
     SPLITTER_HORIZONTAL = "SPLITTER_HORIZONTAL", "|"
     SPLITTER_VERTICAL = "SPLITTER_VERTICAL", "-"
-
-    def __new__(cls, value, str_repr):
-        obj = object.__new__(cls)
-        obj._value_ = value
-        obj.str_repr = str_repr
-        return obj
 
     def empty(self) -> bool:
         return self == TileStatus.EMPTY
@@ -77,13 +69,6 @@ class TileStatus(Enum):
                 return Direction.SOUTH
             case _:
                 raise ValueError(f"Unknown Direction {entry}, shouldn't be possible!")
-
-    @classmethod
-    def from_char(cls, char: str) -> Self:
-        for opt in cls.__members__.values():
-            if opt.str_repr == char:
-                return opt
-        raise ValueError(f"Unknown char {char}")
 
 
 def generate_beams_by_coords(grid: Grid, initial_beam: Beam) -> dict[tuple[int, int], set[Direction]]:

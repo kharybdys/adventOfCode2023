@@ -40,7 +40,22 @@ class Range:
         return self.start > value
 
 
-class Direction(Enum):
+class PrintEnum(Enum):
+    def __new__(cls, value, str_repr):
+        obj = object.__new__(cls)
+        obj._value_ = value
+        obj.str_repr = str_repr
+        return obj
+
+    @classmethod
+    def from_char(cls, char: str) -> Self:
+        for opt in cls.__members__.values():
+            if opt.str_repr == char:
+                return opt
+        raise ValueError(f"Unknown char {char}")
+
+
+class Direction(PrintEnum):
     EAST = "EAST", "<"
     WEST = "WEST", ">"
     SOUTH = "SOUTH", "^"

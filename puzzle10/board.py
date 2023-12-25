@@ -1,14 +1,13 @@
 from collections import Counter
-from enum import Enum
 from functools import cache, cached_property
 from typing import Self, Generator
 
-from utils import Direction
+from utils import Direction, PrintEnum
 
 DEBUG = False
 
 
-class PipeStatus(Enum):
+class PipeStatus(PrintEnum):
     EASTWEST = "EASTWEST", "-"
     NORTHSOUTH = "NORTHSOUTH", "|"
     SOUTHEAST = "SOUTHEAST", "F"
@@ -17,12 +16,6 @@ class PipeStatus(Enum):
     NORTHWEST = "NORTHWEST", "J"
     EMPTY = "EMPTY", "."
     START = "START", "S"
-
-    def __new__(cls, value, str_repr):
-        obj = object.__new__(cls)
-        obj._value_ = value
-        obj.str_repr = str_repr
-        return obj
 
     @cache
     def can_go(self, direction: Direction) -> bool:
@@ -35,25 +28,12 @@ class PipeStatus(Enum):
     def directions(self) -> list[Direction]:
         return list(filter(lambda d: self.can_go(d), Direction.all()))
 
-    @classmethod
-    def from_char(cls, char: str) -> Self:
-        for opt in cls.__members__.values():
-            if opt.str_repr == char:
-                return opt
-        raise ValueError(f"Unknown char {char}")
 
-
-class InsideOutsideStatus(Enum):
+class InsideOutsideStatus(PrintEnum):
     INSIDE = "INSIDE", "I"
     OUTSIDE = "OUTSIDE", "O"
     LOOP = "LOOP", "."
     UNKNOWN = "UNKNOWN", " "
-
-    def __new__(cls, value, str_repr):
-        obj = object.__new__(cls)
-        obj._value_ = value
-        obj.str_repr = str_repr
-        return obj
 
 
 class Board:

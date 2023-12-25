@@ -1,17 +1,12 @@
-from enum import Enum
 from typing import Optional, Self
 
+from utils import PrintEnum
 
-class FloorStatus(Enum):
+
+class FloorStatus(PrintEnum):
     EAST = "EAST", ">"
     SOUTH = "SOUTH", "v"
     EMPTY = "EMPTY", "."
-
-    def __new__(cls, value, str_repr):
-        obj = object.__new__(cls)
-        obj._value_ = value
-        obj.str_repr = str_repr
-        return obj
 
     def __bool__(self) -> bool:
         return not self == FloorStatus.EMPTY
@@ -24,13 +19,6 @@ class FloorStatus(Enum):
                 return x+1, y
             case _:
                 raise NotImplementedError("Cannot provide next coordinates for an empty floor slot")
-
-    @classmethod
-    def from_char(cls, char: str) -> Self:
-        for opt in cls.__members__.values():
-            if opt.str_repr == char:
-                return opt
-        raise ValueError(f"Unknown char {char}")
 
 
 class SeaFloor:

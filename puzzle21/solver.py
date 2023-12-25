@@ -1,31 +1,16 @@
 from collections import namedtuple
-from enum import Enum
-from math import sqrt
-from typing import Self, Generator
+from typing import Generator
 
-from utils import Grid, Direction
+from utils import Grid, Direction, PrintEnum
 
 
-class TileStatus(Enum):
+class TileStatus(PrintEnum):
     EMPTY = "EMPTY", "."
     ROCK = "ROCK", "#"
     START = "START", "S"
 
-    def __new__(cls, value, str_repr):
-        obj = object.__new__(cls)
-        obj._value_ = value
-        obj.str_repr = str_repr
-        return obj
-
     def __bool__(self) -> bool:
         return self == TileStatus.ROCK
-
-    @classmethod
-    def from_char(cls, char: str) -> Self:
-        for opt in cls.__members__.values():
-            if opt.str_repr == char:
-                return opt
-        raise ValueError(f"Unknown char {char}")
 
 
 TileGrid = Grid[TileStatus]
