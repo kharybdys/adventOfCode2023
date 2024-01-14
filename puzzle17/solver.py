@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from functools import cached_property, cache
 from math import floor
 from queue import PriorityQueue
@@ -35,7 +35,6 @@ class Attempt:
     straight_steps_taken: int
     grid: IntGrid
     route: dict[tuple[int, int], Direction] = field(default_factory=dict)
-    max_straight_steps: ClassVar[int] = 3
 
     @cached_property
     def minimal_cost(self) -> int:
@@ -53,13 +52,11 @@ class Attempt:
         new_straight_steps_taken = 1 if new_entry != self.entry else self.straight_steps_taken + 1
         new_route = self.route.copy()
         new_route[(self.x, self.y)] = self.entry
-        return Attempt(cost=self.cost + cost_addition,
+        return replace(self,
+                       cost=self.cost + cost_addition,
                        x=new_x,
                        y=new_y,
-                       end_x=self.end_x,
-                       end_y=self.end_y,
                        entry=new_entry,
-                       grid=self.grid,
                        route=new_route,
                        straight_steps_taken=new_straight_steps_taken)
 
@@ -75,12 +72,13 @@ def print_route_and_grid(route: dict[tuple[int, int], Direction], grid: IntGrid)
         print("".join(route[(x, y)].str_repr if (x, y) in route else str(grid.value_at(x, y)) for x in range(0, grid.width)))
 
 
-def find_minimal_path(grid: IntGrid, first_attempt: Attempt) -> int:
+def find_minimal_path(grid: IntGrid, first_attempts: list[Attempt], min_straight_steps: int, max_straight_steps: int) -> int:
     UPPER_LIMIT = 1000000000
-    print(f"Starting with {first_attempt=}")
+    print(f"Starting with {first_attempts=}")
     already_tried_attempts: dict[tuple[int, int, Direction, int], int] = {}
     attempts = PriorityQueue()
-    attempts.put_nowait(first_attempt)
+    for first_attempt in first_attempts:
+        attempts.put_nowait(first_attempt)
     best_cost = UPPER_LIMIT
     while not attempts.empty():
         attempt: Attempt = attempts.get_nowait()
@@ -95,7 +93,9 @@ def find_minimal_path(grid: IntGrid, first_attempt: Attempt) -> int:
         elif attempt.cost < best_cost:
             already_tried_attempts[attempt.primary_key] = min(already_tried_attempts.get(attempt.primary_key, UPPER_LIMIT), attempt.cost)
             for direction in attempt.entry.all_but_me:
-                if direction != attempt.entry.opposite or attempt.straight_steps_taken < attempt.max_straight_steps:
+                straight_acceptable = direction == attempt.entry.opposite and attempt.straight_steps_taken < max_straight_steps
+                turn_acceptable = direction not in (attempt.entry, attempt.entry.opposite) and attempt.straight_steps_taken >= min_straight_steps
+                if straight_acceptable or turn_acceptable:
                     new_x, new_y = direction.next_coords(attempt.x, attempt.y)
                     if grid.within_bounds(new_x, new_y):
                         next_attempt = attempt.next_attempt(new_x, new_y, grid.value_at(new_x, new_y), direction.opposite)
@@ -107,18 +107,34 @@ def find_minimal_path(grid: IntGrid, first_attempt: Attempt) -> int:
 def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     grid = Grid.from_lines(puzzle_input, int)
+    first_attempt = Attempt(cost=0,
+                            x=0,
+                            y=0,
+                            end_x=grid.width - 1,
+                            end_y=grid.height - 1,
+                            entry=Direction.NORTH,
+                            straight_steps_taken=0,
+                            grid=grid
+                            )
     print(find_minimal_path(grid=grid,
-                            first_attempt=Attempt(cost=0,
-                                                  x=0,
-                                                  y=0,
-                                                  end_x=grid.width - 1,
-                                                  end_y=grid.height - 1,
-                                                  entry=Direction.NORTH,
-                                                  straight_steps_taken=0,
-                                                  grid=grid
-                                                  )
-                            ))
+                            first_attempts=[first_attempt, replace(first_attempt, entry=Direction.WEST)],
+                            min_straight_steps=0,
+                            max_straight_steps=3))
 
 
 def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
+    grid = Grid.from_lines(puzzle_input, int)
+    first_attempt = Attempt(cost=0,
+                            x=0,
+                            y=0,
+                            end_x=grid.width - 1,
+                            end_y=grid.height - 1,
+                            entry=Direction.NORTH,
+                            straight_steps_taken=0,
+                            grid=grid
+                            )
+    print(find_minimal_path(grid=grid,
+                            first_attempts=[first_attempt, replace(first_attempt, entry=Direction.WEST)],
+                            min_straight_steps=4,
+                            max_straight_steps=10))
