@@ -24,7 +24,7 @@ def calculate_remaining_distance(grid: IntGrid) -> dict[tuple[int, int], int]:
     return result
 
 
-@dataclass
+@dataclass(repr=True)
 class Attempt:
     cost: int
     x: int
@@ -60,7 +60,7 @@ class Attempt:
                        end_y=self.end_y,
                        entry=new_entry,
                        grid=self.grid,
-                       route = new_route,
+                       route=new_route,
                        straight_steps_taken=new_straight_steps_taken)
 
     def __lt__(self, other) -> bool:
@@ -76,29 +76,31 @@ def print_route_and_grid(route: dict[tuple[int, int], Direction], grid: IntGrid)
 
 
 def find_minimal_path(grid: IntGrid, first_attempt: Attempt) -> int:
-    already_tried_attempts: set[tuple[int, int, Direction, int]] = set()
+    UPPER_LIMIT = 1000000000
+    print(f"Starting with {first_attempt=}")
+    already_tried_attempts: dict[tuple[int, int, Direction, int], int] = {}
     attempts = PriorityQueue()
     attempts.put_nowait(first_attempt)
-    best_cost = 1000000000
+    best_cost = UPPER_LIMIT
     while not attempts.empty():
         attempt: Attempt = attempts.get_nowait()
         # print(f"Looking at {attempt.minimal_cost}")
 
         if attempt.at_finish():
             # With correct remaining distance, ending here should be enough
-            # print_route_and_grid(attempt.route, grid)
+            print_route_and_grid(attempt.route, grid)
             if attempt.cost < best_cost:
                 best_cost = attempt.cost
                 print(f"Improved best_cost to {attempt.cost}")
         elif attempt.cost < best_cost:
-            already_tried_attempts.add(attempt.primary_key)
+            already_tried_attempts[attempt.primary_key] = min(already_tried_attempts.get(attempt.primary_key, UPPER_LIMIT), attempt.cost)
             for direction in attempt.entry.all_but_me:
                 if direction != attempt.entry.opposite or attempt.straight_steps_taken < attempt.max_straight_steps:
                     new_x, new_y = direction.next_coords(attempt.x, attempt.y)
                     if grid.within_bounds(new_x, new_y):
                         next_attempt = attempt.next_attempt(new_x, new_y, grid.value_at(new_x, new_y), direction.opposite)
-                        if next_attempt.primary_key not in already_tried_attempts:
-                            attempts.put_nowait(next_attempt)
+                        if next_attempt.cost < already_tried_attempts.get(next_attempt.primary_key, UPPER_LIMIT):
+                          attempts.put_nowait(next_attempt)
     return best_cost
 
 
