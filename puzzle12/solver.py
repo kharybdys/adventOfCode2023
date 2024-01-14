@@ -1,5 +1,5 @@
 import re
-from collections import deque
+from collections import defaultdict
 from typing import Generator
 
 from puzzle12.nonogram import to_nonogram_pattern, NonogramPattern
@@ -102,40 +102,47 @@ def solve_b_too_naive(puzzle_input: list[str], example: bool) -> None:
     print(solution)
 
 
-def solve_nonogram(initial_pattern: NonogramPattern, example: bool) -> int:
-    combinations = 0
-    patterns_to_check: deque[NonogramPattern] = deque()
-    patterns_to_check.append(initial_pattern)
-    while patterns_to_check:
-        current_pattern = patterns_to_check.pop()
-        if current_pattern.completed:
-            if example:
-                print(f"Completed pattern: {current_pattern}")
-            if current_pattern.valid:
-                combinations += 1
-        else:
-            white_counted = 0 if current_pattern.first_or_last else 1
-            if example:
-                print(f"Range from {current_pattern.remaining_whites_possible + white_counted} to {-1 + white_counted}")
-            for new_white in range(current_pattern.remaining_whites_possible + white_counted, -1 + white_counted, -1):
-                new_pattern = current_pattern.copy_and_next_white_length(new_white)
-                if example:
-                    print(f"Checking: {new_pattern=}")
-                if new_pattern.matches:
-                    if example:
-                        print(f"Matches")
-                    patterns_to_check.append(new_pattern)
-    return combinations
+def solve_nonogram(pattern: NonogramPattern, example: bool) -> int:
+    # dict blacks_covered to extra_whites_covered to combinations
+    combinations_found: dict[int, dict[int, int]] = defaultdict(dict)
+    for blacks_to_cover in range(0, len(pattern.black_pattern)):
+        # print(f"{blacks_to_cover=}")
+        for subtotal_extra_whites in range(0, pattern.total_whites_possible + 1):
+            if blacks_to_cover == len(pattern.black_pattern) - 1 and not pattern.ends_empty(pattern.total_whites_possible - subtotal_extra_whites):
+                # Final bit cannot be completely empty so impossible anyway
+                continue
+            is_first = blacks_to_cover == 0
+            correction = 0 if is_first else 1
+            combinations = 0
+            # print(f"{subtotal_extra_whites=}, {correction=}")
+            for next_extra_white_length in range(correction, subtotal_extra_whites + 1 + correction):
+                previous_extra_white_length = subtotal_extra_whites - next_extra_white_length + correction
+                if is_first and previous_extra_white_length != 0:
+                    continue
+                length_covered = pattern.minimum_length(blacks_to_cover) + previous_extra_white_length
+                # print(f"{next_extra_white_length=}, {previous_extra_white_length=}, {length_covered=}")
+                # Is this a valid setup
+                if pattern.matches(start=length_covered,
+                                   current_black_index=blacks_to_cover,
+                                   extra_white_length=next_extra_white_length):
+                    if blacks_to_cover == 0:
+                        combinations += 1
+                    else:
+                        combinations += combinations_found[blacks_to_cover - 1][previous_extra_white_length]
+                # print(f"{combinations=}")
+            combinations_found[blacks_to_cover][subtotal_extra_whites] = combinations
+    print(f"{combinations_found=}")
+    return sum(combinations_found[len(pattern.black_pattern) - 1].values())
 
 
 def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     solution = 0
     for line in puzzle_input:
-        initial_pattern = to_nonogram_pattern(line, 5)
-        print(f"Initial pattern: {initial_pattern}")
-        print(f"{initial_pattern.total_whites_possible=}")
-        combination_count = solve_nonogram(initial_pattern, example)
+        pattern = to_nonogram_pattern(line, 5)
+        print(f"Pattern: {pattern}")
+        print(f"{pattern.total_whites_possible=}")
+        combination_count = solve_nonogram(pattern, example)
         print(f"Line {line} results in combinations {combination_count}")
         solution += combination_count
     print(solution)

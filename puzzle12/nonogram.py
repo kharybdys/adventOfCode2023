@@ -1,73 +1,46 @@
-from copy import copy
 from dataclasses import dataclass, field
 from functools import cached_property
-from typing import ClassVar, Self
+from typing import ClassVar
 
 
 @dataclass(frozen=True)
 class NonogramPattern:
     target_pattern: str
     black_pattern: list[int] = field(default_factory=list)
-    white_pattern: list[int] = field(default_factory=list)
     EMPTY: ClassVar[str] = "."
     UNKNOWN: ClassVar[str] = "?"
     FILLED: ClassVar[str] = "#"
 
-    def __repr__(self) -> str:
-        return f"NonogramPattern(pattern={self.target_pattern}, partial={self.partial_string}, blacks={self.black_pattern}, whites={self.white_pattern})"
-
     @cached_property
     def total_whites_possible(self) -> int:
-        return len(self.target_pattern) - sum(self.black_pattern) - len(self.black_pattern) + 1
+        return len(self.target_pattern) - self.minimum_length(len(self.black_pattern))
 
-    @cached_property
-    def remaining_whites_possible(self) -> int:
-        if len(self.white_pattern) == 0:
-            correction = 0
-        elif len(self.white_pattern) == len(self.black_pattern) + 1:
-            correction = 2
+    def minimum_length(self, blacks_covered: int):
+        if blacks_covered == 0:
+            return 0
         else:
-            correction = 1
-        return self.total_whites_possible - sum(self.white_pattern) + len(self.white_pattern) - correction
+            return sum(self.black_pattern[0:blacks_covered]) + blacks_covered - 1
 
-    @cached_property
-    def first_or_last(self) -> bool:
-        return len(self.white_pattern) == 0 or len(self.white_pattern) >= len(self.black_pattern)
-
-    @cached_property
-    def partial_string(self) -> str:
-        chars = []
-        for index, white_length in enumerate(self.white_pattern):
-            chars.extend([self.EMPTY] * white_length)
-            if index < len(self.black_pattern):
-                chars.extend([self.FILLED] * self.black_pattern[index])
-        if not self.first_or_last:
-            chars.append(self.EMPTY)
-        return "".join(chars)
-
-    @cached_property
-    def matches(self) -> bool:
-        for index, char in enumerate(self.partial_string):
-            if char == self.UNKNOWN or self.target_pattern[index] == self.UNKNOWN:
-                continue
-            elif char == self.FILLED and self.target_pattern[index] == self.FILLED:
-                continue
-            elif char == self.EMPTY and self.target_pattern[index] == self.EMPTY:
-                continue
-            else:
+    def matches(self, start: int, current_black_index: int, extra_white_length: int) -> bool:
+        stop = start + extra_white_length + self.black_pattern[current_black_index]
+        # print(f"Checking matches for {start=}, {stop=}, {self.target_pattern[start:stop + 1]}, whites_length: {extra_white_length}")
+        for index, char in enumerate(self.target_pattern[start:stop + 1], start=start):
+            if index == stop:
+                if char == self.FILLED:
+                    # print(f"Doesn't match because final char is filled, {index=}")
+                    return False
+            elif index < start + extra_white_length:
+                if char == self.FILLED:
+                    # print(f"Doesn't match because initial whites has a filled space, {index=}")
+                    return False
+            elif char == self.EMPTY:
+                # print(f"Doesn't match because an empty block is in the wanted blacks space, {index=}")
                 return False
         return True
 
-    @cached_property
-    def completed(self) -> bool:
-        return len(self.white_pattern) == len(self.black_pattern) + 1
-
-    @cached_property
-    def valid(self) -> bool:
-        return self.completed and self.remaining_whites_possible == 0 and self.matches
-
-    def copy_and_next_white_length(self, next_white: int) -> Self:
-        return NonogramPattern(target_pattern=self.target_pattern, black_pattern=copy(self.black_pattern), white_pattern=copy(self.white_pattern) + [next_white])
+    def ends_empty(self, final_white_length: int) -> bool:
+        start = len(self.target_pattern) - final_white_length
+        return all(char != self.FILLED for char in self.target_pattern[start:])
 
 
 def to_nonogram_pattern(line: str, multiplier: int) -> NonogramPattern:
