@@ -2,7 +2,14 @@ from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
 from itertools import groupby
-from typing import Generator, Self, TypeVar, Generic, Callable
+from typing import Generator, Self, TypeVar, Generic, Callable, Protocol
+
+
+class SolverFunction(Protocol):
+    def __call__(self,
+                 puzzle_input: list[str],
+                 example: bool) -> None:
+        pass
 
 
 def all_equal(iterable):
