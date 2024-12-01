@@ -4,8 +4,8 @@ from pathlib import Path
 from registry import get_solver, import_all_solvers
 
 # I intend to manually change this for every puzzle
-DEFAULT_YEAR = "2022"
-DEFAULT_PUZZLE = "11"
+DEFAULT_YEAR = "2024"
+DEFAULT_PUZZLE = "1"
 DEFAULT_VARIATION = "b"
 EXAMPLE = False
 
@@ -18,7 +18,7 @@ def load_input(year: str, key: str) -> list[str]:
         return [line.rstrip() for line in file]
 
 
-if __name__ == "__main__":
+def main():
     import_all_solvers()
 
     parser = ArgumentParser(prog="AdventOfCode2023_solver")
@@ -33,3 +33,6 @@ if __name__ == "__main__":
     else:
         raise NotImplementedError(f"No support for combination {args.year}, {args.puzzle}, {args.variation}")
 
+
+if __name__ == "__main__":
+    main()
