@@ -1,3 +1,14 @@
 **/__pycache__
 **/.pytest_cache_
 .idea
+venv
+
+# Don't version control puzzle inputs, Advent of Code doesn't like that
+/data/2021/*
+!/data/2021/.gitkeep
+/data/2022/*
+!/data/2022/.gitkeep
+/data/2023/*
+!/data/2023/.gitkeep
+/data/2024/*
+!/data/2024/.gitkeep
