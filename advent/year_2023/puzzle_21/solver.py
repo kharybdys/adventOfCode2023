@@ -1,4 +1,6 @@
-from collections import namedtuple
+import pprint
+from collections import namedtuple, defaultdict
+from dataclasses import dataclass
 from typing import Generator
 
 from registry import register_solver
@@ -76,8 +78,7 @@ def calculate_valid_targets(start_x: int, start_y: int, grid: TileGrid, step: in
     return solution
 
 
-@register_solver(year="2023", key="21", variation="b")
-def solve_b(puzzle_input: list[str], example: bool) -> None:
+def solve_b_too_high(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     steps_to_check = [6, 10, 50, 100, 500, 1000, 5000] if example else [26501365]
     # Need to check target_step * target_step options, centered on start_x, start_y
@@ -87,3 +88,83 @@ def solve_b(puzzle_input: list[str], example: bool) -> None:
     # More importantly, counting too many since some squares will not have been reachable due to a rock on an earlier step
     for step in steps_to_check:
         print(f"{step=}: {calculate_valid_targets(start_x, start_y, grid, step=step + 1)}")
+
+
+DEBUG = False
+
+
+@dataclass
+class CoordsMapping:
+    target: Coords
+    offset: Coords
+
+
+def wrap_coords(x: int, y: int, grid: TileGrid) -> tuple[int, int, int, int]:
+    lim_x = x % grid.width
+    lim_y = y % grid.height
+    return lim_x, lim_y, x - lim_x, y - lim_y
+
+
+def generate_coords_mapping_for_step_size(step_size: int, grid: TileGrid) -> dict[Coords, dict[Coords, set[Coords]]]:
+    result: dict[Coords, dict[Coords, set[Coords]]] = {}
+    # Generate a mapping for one step
+    coords_mapping: dict[Coords, list[CoordsMapping]] = defaultdict(list)
+    for x, y, tile in grid.coords_iterator:
+        if not tile:
+            for direction in Direction.all():
+                new_x, new_y, offset_x, offset_y = wrap_coords(*direction.next_coords(x, y), grid=grid)
+                if not grid.value_at_or(new_x, new_y):
+                    coords_mapping[Coords(x, y)].append(CoordsMapping(Coords(new_x, new_y), Coords(offset_x, offset_y)))
+    # For each "starting coordinate", generate the step_sized mapping
+    for x, y, tile in grid.coords_iterator:
+        if not tile:
+            coords_offsets: dict[Coords, set[Coords]] = defaultdict(set)
+            coords_offsets[Coords(x, y)].add(Coords(0, 0))
+            for step in range(step_size):
+                new_coords_offsets: dict[Coords, set[Coords]] = defaultdict(set)
+                for coords, offsets in coords_offsets.items():
+                    for new_coords_mapping in coords_mapping.get(coords, []):
+                        new_offsets: set[Coords] = {Coords(x=offset.x + new_coords_mapping.offset.x,
+                                                           y=offset.y + new_coords_mapping.offset.y) for offset in offsets}
+                        new_coords_offsets[new_coords_mapping.target].update(new_offsets)
+                coords_offsets = new_coords_offsets
+            result[Coords(x, y)] = coords_offsets
+    return result
+
+
+@register_solver(year="2023", key="21", variation="b")
+def solve_b_too_slow(puzzle_input: list[str], example: bool) -> None:
+    print("\n".join(puzzle_input))
+    # 26501365 = 5 * 11 * 481843
+    # 26501365 = 5146^2 + 20049
+    # 20049 = 3 * 41 * 163
+    # 5146 = 2 * 31 * 83
+    steps_to_check = [10, 50, 100, 500, 1000, 5000] if example else [26501365]
+    grid: TileGrid = Grid.from_lines(puzzle_input, TileStatus.from_char)
+    start_x, start_y = get_start_coord(grid)
+
+    step_size = 10 if example else 55  # These are factors of the steps_to_check values
+
+    coords_mapping: dict[Coords, dict[Coords, set[Coords]]] = generate_coords_mapping_for_step_size(step_size, grid)
+    print(f"Mapping: {pprint.pprint(coords_mapping)}")
+
+    # list[Coords] is the list of offsets in which this coordinate pair is reachable
+    coords_offsets: dict[Coords, set[Coords]] = defaultdict(set)
+    coords_offsets[Coords(start_x, start_y)].add(Coords(0, 0))
+
+    for step in range(step_size, steps_to_check[-1] + 1, step_size):
+        new_coords_offsets: dict[Coords, set[Coords]] = defaultdict(set)
+        for coords, offsets in coords_offsets.items():
+            if DEBUG:
+                print(f"Adding new_coords: {coords_mapping.get(coords, [])} for {coords}")
+            for new_coords, new_offsets in coords_mapping.get(coords, {}).items():
+                combined_offsets: set[Coords] = {Coords(x=offset.x + new_offset.x,
+                                                        y=offset.y + new_offset.y) for offset in offsets for new_offset in new_offsets}
+                new_coords_offsets[new_coords].update(combined_offsets)
+        coords_offsets = new_coords_offsets
+
+        if step in steps_to_check:
+            print(f"At step {step}, solution is {sum(map(len, coords_offsets.values()))}")
+            if DEBUG:
+                print(f"Counter: {pprint.pprint(coords_offsets)}")
+
