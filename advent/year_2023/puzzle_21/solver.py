@@ -105,66 +105,72 @@ def wrap_coords(x: int, y: int, grid: TileGrid) -> tuple[int, int, int, int]:
     return lim_x, lim_y, x - lim_x, y - lim_y
 
 
-def generate_coords_mapping_for_step_size(step_size: int, grid: TileGrid) -> dict[Coords, dict[Coords, set[Coords]]]:
+def apply_mapping(
+        coords_offsets: dict[Coords, set[Coords]],
+        coords_mapping: dict[Coords, dict[Coords, set[Coords]]]
+) -> dict[Coords, set[Coords]]:
+    new_coords_offsets: dict[Coords, set[Coords]] = defaultdict(set)
+    for coords, offsets in coords_offsets.items():
+        for new_coords, new_offsets in coords_mapping.get(coords, {}).items():
+            new_coords_offsets[new_coords].update({Coords(x=offset.x + new_offset.x,
+                                                          y=offset.y + new_offset.y)
+                                                   for offset in offsets for new_offset in new_offsets})
+    return new_coords_offsets
+
+
+def generate_coords_mapping_for_step_size(
+        step_size: int,
+        starting_mapping: dict[Coords, dict[Coords, set[Coords]]]
+) -> dict[Coords, dict[Coords, set[Coords]]]:
+
     result: dict[Coords, dict[Coords, set[Coords]]] = {}
-    # Generate a mapping for one step
-    coords_mapping: dict[Coords, list[CoordsMapping]] = defaultdict(list)
-    for x, y, tile in grid.coords_iterator:
-        if not tile:
-            for direction in Direction.all():
-                new_x, new_y, offset_x, offset_y = wrap_coords(*direction.next_coords(x, y), grid=grid)
-                if not grid.value_at_or(new_x, new_y):
-                    coords_mapping[Coords(x, y)].append(CoordsMapping(Coords(new_x, new_y), Coords(offset_x, offset_y)))
-    # For each "starting coordinate", generate the step_sized mapping
-    for x, y, tile in grid.coords_iterator:
-        if not tile:
-            coords_offsets: dict[Coords, set[Coords]] = defaultdict(set)
-            coords_offsets[Coords(x, y)].add(Coords(0, 0))
-            for step in range(step_size):
-                new_coords_offsets: dict[Coords, set[Coords]] = defaultdict(set)
-                for coords, offsets in coords_offsets.items():
-                    for new_coords_mapping in coords_mapping.get(coords, []):
-                        new_offsets: set[Coords] = {Coords(x=offset.x + new_coords_mapping.offset.x,
-                                                           y=offset.y + new_coords_mapping.offset.y) for offset in offsets}
-                        new_coords_offsets[new_coords_mapping.target].update(new_offsets)
-                coords_offsets = new_coords_offsets
-            result[Coords(x, y)] = coords_offsets
+
+    for start_coords in starting_mapping:
+        coords_offsets: dict[Coords, set[Coords]] = defaultdict(set)
+        coords_offsets[start_coords].add(Coords(0, 0))
+        for step in range(step_size):
+            coords_offsets = apply_mapping(coords_offsets, starting_mapping)
+        result[start_coords] = coords_offsets
     return result
 
 
 @register_solver(year="2023", key="21", variation="b")
 def solve_b_too_slow(puzzle_input: list[str], example: bool) -> None:
     print("\n".join(puzzle_input))
-    # 26501365 = 5 * 11 * 481843
-    # 26501365 = 5146^2 + 20049
-    # 20049 = 3 * 41 * 163
-    # 5146 = 2 * 31 * 83
-    steps_to_check = [10, 50, 100, 500, 1000, 5000] if example else [26501365]
+    target_step = 500 if example else 26501365
     grid: TileGrid = Grid.from_lines(puzzle_input, TileStatus.from_char)
-    start_x, start_y = get_start_coord(grid)
 
-    step_size = 10 if example else 55  # These are factors of the steps_to_check values
+    step_multiplier = 2
 
-    coords_mapping: dict[Coords, dict[Coords, set[Coords]]] = generate_coords_mapping_for_step_size(step_size, grid)
+    # Generate a start mapping
+    coords_mapping: dict[int, dict[Coords, dict[Coords, set[Coords]]]] = defaultdict(dict)
+    for x, y, tile in grid.coords_iterator:
+        if not tile:
+            coords_mapping[1][Coords(x, y)] = {}
+            for direction in Direction.all():
+                new_x, new_y, offset_x, offset_y = wrap_coords(*direction.next_coords(x, y), grid=grid)
+                if not grid.value_at_or(new_x, new_y):
+                    coords_mapping[1][Coords(x, y)][Coords(new_x, new_y)] = {Coords(offset_x, offset_y)}
     print(f"Mapping: {pprint.pprint(coords_mapping)}")
 
-    # list[Coords] is the list of offsets in which this coordinate pair is reachable
-    coords_offsets: dict[Coords, set[Coords]] = defaultdict(set)
-    coords_offsets[Coords(start_x, start_y)].add(Coords(0, 0))
+    step = 1
+    while step * step_multiplier <= target_step:
+        coords_mapping[step * step_multiplier] = generate_coords_mapping_for_step_size(step_multiplier,
+                                                                                       coords_mapping[step])
+        step *= step_multiplier
+        print(f"Added mapping for {step}, size of mapping is {sum(map(lambda dct: sum(map(len, dct.values())), coords_mapping[step].values()))}")
 
-    for step in range(step_size, steps_to_check[-1] + 1, step_size):
-        new_coords_offsets: dict[Coords, set[Coords]] = defaultdict(set)
-        for coords, offsets in coords_offsets.items():
-            if DEBUG:
-                print(f"Adding new_coords: {coords_mapping.get(coords, [])} for {coords}")
-            for new_coords, new_offsets in coords_mapping.get(coords, {}).items():
-                combined_offsets: set[Coords] = {Coords(x=offset.x + new_offset.x,
-                                                        y=offset.y + new_offset.y) for offset in offsets for new_offset in new_offsets}
-                new_coords_offsets[new_coords].update(combined_offsets)
-        coords_offsets = new_coords_offsets
+    start_x, start_y = get_start_coord(grid)
 
-        if step in steps_to_check:
-            print(f"At step {step}, solution is {sum(map(len, coords_offsets.values()))}")
-            if DEBUG:
-                print(f"Counter: {pprint.pprint(coords_offsets)}")
+    step = 0
+    coords_offsets: dict[Coords, set[Coords]] = {Coords(start_x, start_y): {Coords(0, 0)}}
+    while step < target_step:
+        step_size = max(filter(lambda i: step + i <= target_step, coords_mapping.keys()))
+        print(f"At step {step}, applying mapping for {step_size=}")
+        print(f"At step {step}, starting_point is {sum(map(len, coords_offsets.values()))}")
+        coords_offsets = apply_mapping(coords_offsets, coords_mapping[step_size])
+        step += step_size
+
+    assert step == target_step
+    print(f"At step {step}, solution is {sum(map(len, coords_offsets.values()))}")
 
