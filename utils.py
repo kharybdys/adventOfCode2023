@@ -165,6 +165,12 @@ class Grid(Generic[T]):
     def value_at(self, x: int, y: int) -> T:
         return self.tiles[y][x]
 
+    def value_at_or(self, x: int, y: int, default: T | None = None) -> T | None:
+        if self.within_bounds(x, y):
+            return self.tiles[y][x]
+        else:
+            return default
+
     def set_value_at(self, x: int, y: int, value: T):
         if self.within_bounds(x, y):
             self.tiles[y][x] = value
