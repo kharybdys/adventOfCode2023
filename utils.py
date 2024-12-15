@@ -93,6 +93,14 @@ class Direction(PrintEnum):
             case _:
                 raise ValueError(f"Impossible, unsupported direction: {self}")
 
+    @property
+    def horizontal(self) -> bool:
+        return self in [Direction.EAST, Direction.WEST]
+
+    @property
+    def vertical(self) -> bool:
+        return self in [Direction.NORTH, Direction.SOUTH]
+
     @cached_property
     def opposite(self) -> Self:
         match self:
