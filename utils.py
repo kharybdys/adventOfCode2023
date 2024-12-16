@@ -200,3 +200,7 @@ class Grid(Generic[T]):
     def print_grid(self, print_function: Callable[[T], str]):
         for y in range(0, self.height):
             print("".join(print_function(tile) for tile in self.tiles[y]))
+
+    def print_grid_using_coords(self, print_function: Callable[[int, int, T], str]):
+        for y in range(0, self.height):
+            print("".join(print_function(x, y, tile) for x, tile in enumerate(self.tiles[y])))
