@@ -1,3 +1,4 @@
+from collections import namedtuple
 from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
@@ -26,6 +27,9 @@ def split_in_groups_separated_by_empty_line(puzzle_input: list[str]) -> Generato
             yield lines
             lines = []
     yield lines
+
+
+Coords = namedtuple("Coords", ["x", "y"])
 
 
 @dataclass
@@ -164,7 +168,11 @@ class Grid(Generic[T]):
         self.width = len(tiles[0])
 
     @staticmethod
-    def from_lines(lines: list[str], converter_function: Callable[[str], T]):
+    def from_size(width: int, height: int, tile: T) -> Self:
+        return Grid(tiles=[[tile for _ in range(width)] for _ in range(height)])
+
+    @staticmethod
+    def from_lines(lines: list[str], converter_function: Callable[[str], T]) -> Self:
         return Grid(tiles=[[converter_function(char) for char in line] for line in lines])
 
     def within_bounds(self, x: int, y: int) -> bool:
