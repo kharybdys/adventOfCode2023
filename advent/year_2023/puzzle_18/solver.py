@@ -1,10 +1,11 @@
 import re
-from collections import deque
+from collections import deque, defaultdict
 from dataclasses import dataclass
+from itertools import batched
 from typing import Generator
 
 from registry import register_solver
-from utils import Direction, Grid
+from utils import Direction, Grid, Coords, Range
 
 DEBUG = False
 
@@ -18,7 +19,7 @@ class DigInstruction:
     hex: str
 
     def parse_hex(self):
-        self.distance = int(self.hex[:4], 16)
+        self.distance = int(self.hex[:5], 16)
         match self.hex[5]:
             case "0":
                 self.direction = Direction.EAST
@@ -211,11 +212,77 @@ def parse(puzzle_input: list[str]) -> Generator[DigInstruction, None, None]:
             raise ValueError(f"Invalid line {line}")
 
 
+def calculate_area_by_vertices_and_slicing(dig_instructions: list[DigInstruction]) -> int:
+    coords = Coords(0, 0)
+    edges: set[Coords] = {coords}
+    for dig_instruction in dig_instructions:
+        print(f"{dig_instruction=}")
+        coords = Coords(*dig_instruction.direction.next_coords(*coords, steps=dig_instruction.distance))
+        print(f"{coords.x:10}, {coords.y:10}")
+        edges.add(coords)
+    if coords == Coords(0, 0):
+        pass
+    elif coords.x == 0 or coords.y == 0:
+        edges.remove(coords)
+    else:
+        raise ValueError(f"Should end at one of the axis (preferably at origin), but ended up at {coords}")
+
+    edges_by_x: dict[int, set[Coords]] = defaultdict(set)
+    for edge in sorted(edges):
+        edges_by_x[edge.x].add(edge)
+
+    dig = 0
+    while len(edges_by_x.keys()) > 2:
+        x = min(edges_by_x.keys())
+        next_x = min(e_x for e_x in edges_by_x.keys() if e_x != x)
+        print(f"     {sorted(edges_by_x[x])=}")
+        print(f"{sorted(edges_by_x[next_x])=}")
+        print(f"                       {dig=}")
+        if len(edges_by_x[x]) % 2 != 0:
+            raise ValueError(f"Should have an even number of coordinates on each x, not so: {edges_by_x[x]}")
+        for start_edge, end_edge in batched(sorted(edges_by_x[x]), 2):
+            dig += (end_edge.y - start_edge.y + 1) * (next_x - x)
+
+            next_start_edge = Coords(next_x, start_edge.y)
+            if next_start_edge in edges_by_x[next_x]:
+                edges_by_x[next_x].remove(next_start_edge)
+            else:
+                edges_by_x[next_x].add(next_start_edge)
+
+            next_end_edge = Coords(next_x, end_edge.y)
+            if next_end_edge in edges_by_x[next_x]:
+                edges_by_x[next_x].remove(next_end_edge)
+            else:
+                edges_by_x[next_x].add(next_end_edge)
+
+            next_ys = list(sorted(edge.y for edge in edges_by_x[next_x]))
+
+            for start_y, end_y in batched(next_ys[1:-1], 2):
+                if start_y > start_edge.y and end_y < end_edge.y:
+                    dig += end_y - start_y - 1
+
+        del edges_by_x[x]
+    print(f"{dig=}")
+    print(f"{edges_by_x=}")
+    if any(len(ys) % 2 != 0 for ys in edges_by_x.values()):
+        raise ValueError("Invalid end situation, should have exactly an even amount of values that form one or more rectangles")
+    x = min(edges_by_x.keys())
+    next_x = min(e_x for e_x in edges_by_x.keys() if e_x != x)
+    ys = {c.y for edges in edges_by_x.values() for c in edges}
+    if any(len(ys) != len(vs) for vs in edges_by_x.values()):
+        raise ValueError("Remaining two columns coordinates do not have equal y values")
+    for start_y, end_y in batched(sorted(ys), 2):
+        dig += (next_x - x + 1) * (end_y - start_y + 1)
+        print(f"{dig=} after {next_x=}, {x=}, {end_y=}, {start_y=}")
+
+    return dig
+
+
 @register_solver(year="2023", key="18", variation="a")
 def solve_a(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     dig_instructions = list(parse(puzzle_input))
-    print(solve_dig_instructions_for_big_numbers(dig_instructions))
+    print(calculate_area_by_vertices_and_slicing(dig_instructions))
 
 
 def solve_b_naive(puzzle_input: list[str], example: bool) -> None:
@@ -227,11 +294,19 @@ def solve_b_naive(puzzle_input: list[str], example: bool) -> None:
 
 
 # Latest idea: Bulges but as negative bulges, ie expand the grid to something rectangular and keep track what I needed to add
-@register_solver(year="2023", key="18", variation="b")
-def solve_b(puzzle_input: list[str], example: bool) -> None:
+def solve_b_negative_bulges(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     dig_instructions = list(parse(puzzle_input))
     for dig_instruction in dig_instructions:
         dig_instruction.parse_hex()
         print(dig_instruction)
     print(solve_dig_instructions_for_big_numbers(dig_instructions))
+
+
+@register_solver(year="2023", key="18", variation="b")
+def solve_b(puzzle_input: list[str], example: bool) -> None:
+    print(puzzle_input)
+    dig_instructions = list(parse(puzzle_input))
+    for dig_instruction in dig_instructions:
+        dig_instruction.parse_hex()
+    print(calculate_area_by_vertices_and_slicing(dig_instructions))
