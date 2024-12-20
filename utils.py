@@ -1,4 +1,5 @@
-from collections import namedtuple
+import sys
+from collections import namedtuple, deque
 from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
@@ -212,3 +213,26 @@ class Grid(Generic[T]):
     def print_grid_using_coords(self, print_function: Callable[[int, int, T], str]):
         for y in range(0, self.height):
             print("".join(print_function(x, y, tile) for x, tile in enumerate(self.tiles[y])))
+
+    def all_coords_for(self, value: T) -> Generator[tuple[int, int], None, None]:
+        for x, y, tile in self.coords_iterator:
+            if tile == value:
+                yield x, y
+
+
+def shortest_path_analysis(grid: Grid[T], start_tile: T, wall_tile: T) -> dict[Coords, int]:
+    visited: dict[Coords, int] = {}
+    for start_coords in grid.all_coords_for(start_tile):
+        visited[start_coords] = 0
+    boundary: deque[Coords] = deque()
+    boundary.extend(grid.all_coords_for(start_tile))
+    while boundary:
+        coords = boundary.pop()
+        for direction in Direction.all():
+            new_coords = direction.next_coords(*coords)
+            if grid.value_at_or(*new_coords, default=wall_tile) != wall_tile:
+                old_visit = visited.get(new_coords, sys.maxsize)
+                if old_visit > visited[coords] + 1:
+                    visited[new_coords] = visited[coords] + 1
+                    boundary.append(new_coords)
+    return visited
