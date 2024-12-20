@@ -1,6 +1,5 @@
-from collections import deque
-
-from advent.year_2023.puzzle_20.modules import Module, parse_module, OutputModule, Pulse, WatcherModule
+from advent.year_2023.puzzle_20.cycle_analyzer import analyze
+from advent.year_2023.puzzle_20.modules import Module, parse_module, OutputModule, Pulse, WatcherModule, send_pulse
 from registry import register_solver
 
 DEBUG = False
@@ -23,23 +22,6 @@ def parse(puzzle_input: list[str]) -> dict[str, Module]:
         for dest in module.destinations:
             dest.register_receiver(module)
     return modules_by_name
-
-
-def send_pulse(initial_pulse: Pulse) -> tuple[int, int]:
-    high_pulse_count = 0
-    low_pulse_count = 0
-    pulses: deque[Pulse] = deque()
-    pulses.append(initial_pulse)
-    while pulses:
-        pulse = pulses.popleft()
-        if pulse.high_pulse:
-            high_pulse_count += 1
-        else:
-            low_pulse_count += 1
-        if DEBUG:
-            print(f"Sending pulse from {pulse.source}, high? {pulse.high_pulse} to {pulse.destination.identifier}")
-        pulses.extend(pulse.process())
-    return high_pulse_count, low_pulse_count
 
 
 def sum_low_high_pulse(pulse_tuples: list[tuple[int, int]]) -> tuple[int, int]:
@@ -77,5 +59,12 @@ def solve_a(puzzle_input: list[str], example: bool) -> None:
 def solve_b(puzzle_input: list[str], example: bool) -> None:
     print(puzzle_input)
     modules_by_name = parse(puzzle_input)
-    modules_by_name["rx"] = WatcherModule(identifier="rx", destination_strings=[])
-    count_pulses(100000000000, modules_by_name)
+    target_module = "rx"
+    modules_by_name[target_module] = WatcherModule(identifier=target_module, destination_strings=[])
+    if example:
+        raise ValueError("This solution is tailored to the real input")
+    analyze(
+        modules_by_name=modules_by_name,
+        start_module="broadcaster",
+        target_module=target_module,
+    )
