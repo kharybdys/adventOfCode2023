@@ -45,11 +45,21 @@ class Range:
     def within(self, value: float) -> bool:
         return self.start <= value < self.stop
 
-    def before(self, value: float) -> bool:
+    def before(self, value: float | int) -> bool:
         return self.stop <= value
 
-    def after(self, value: float) -> bool:
+    def after(self, value: float | int) -> bool:
         return self.start > value
+
+
+@dataclass
+class InclusiveRange(Range):
+    @cached_property
+    def size(self) -> int:
+        return self.stop - self.start + 1
+
+    def within(self, value: float | int) -> bool:
+        return self.start <= value <= self.stop
 
 
 class PrintEnum(Enum):

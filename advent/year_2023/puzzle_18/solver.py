@@ -1,11 +1,12 @@
 import re
 from collections import deque, defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass
-from itertools import batched
+from itertools import batched, starmap
 from typing import Generator
 
 from registry import register_solver
-from utils import Direction, Grid, Coords, Range
+from utils import Direction, Grid, Coords, InclusiveRange
 
 DEBUG = False
 
@@ -212,6 +213,59 @@ def parse(puzzle_input: list[str]) -> Generator[DigInstruction, None, None]:
             raise ValueError(f"Invalid line {line}")
 
 
+class Dig:
+    def __init__(self, coords: Iterable[Coords]):
+        self.vertices_by_x: dict[int, set[Coords]] = defaultdict(set)
+        for vertex in sorted(coords):
+            self.vertices_by_x[vertex.x].add(vertex)
+        self.dig_size = 0
+
+    def reduce(self):
+        x = min(self.vertices_by_x.keys())
+        next_x = min(v_x for v_x in self.vertices_by_x.keys() if v_x != x)
+
+        print(f"   {x:10}: {self.get_edges(x)}")
+        print(f"   {next_x:10}: {self.get_edges(next_x)}")
+        print(f"{self.dig_size=}")
+
+        if len(self.vertices_by_x[x]) % 2 != 0:
+            raise ValueError(f"Should have an even number of coordinates on each x, not so: {self.vertices_by_x[x]}")
+        for edge in self.get_edges(x):
+            self.dig_size += edge.size * (next_x - x)
+
+            next_start_vertex = Coords(next_x, edge.start)
+            next_end_vertex = Coords(next_x, edge.stop)
+
+            if next_start_vertex in self.vertices_by_x[next_x]:
+                self.vertices_by_x[next_x].remove(next_start_vertex)
+            else:
+                self.vertices_by_x[next_x].add(next_start_vertex)
+
+            if next_end_vertex in self.vertices_by_x[next_x]:
+                self.vertices_by_x[next_x].remove(next_end_vertex)
+            else:
+                self.vertices_by_x[next_x].add(next_end_vertex)
+
+            for next_edge in self.get_edges(next_x):
+                # Need to correct for finished rectangles (count the final line)
+                # Need to correct for part between two now-edges having been considered an edge before (a variation of finished rectangle?)
+                pass
+
+        del self.vertices_by_x[x]
+
+    def print(self):
+        pass
+
+    def get_edges(self, x: int) -> list[InclusiveRange]:
+        def from_coords(start_coord: Coords, end_coord: Coords) -> InclusiveRange:
+            return InclusiveRange(start=start_coord.y, stop=end_coord.y)
+        return list(starmap(from_coords, batched(sorted(self.vertices_by_x[x]), 2)))
+
+    @property
+    def xs_remaining(self) -> list[int]:
+        return list(self.vertices_by_x.keys())
+
+
 def calculate_area_by_vertices_and_slicing(dig_instructions: list[DigInstruction]) -> int:
     coords = Coords(0, 0)
     edges: set[Coords] = {coords}
@@ -227,55 +281,13 @@ def calculate_area_by_vertices_and_slicing(dig_instructions: list[DigInstruction
     else:
         raise ValueError(f"Should end at one of the axis (preferably at origin), but ended up at {coords}")
 
-    edges_by_x: dict[int, set[Coords]] = defaultdict(set)
-    for edge in sorted(edges):
-        edges_by_x[edge.x].add(edge)
+    dig = Dig(edges)
 
-    dig = 0
-    while len(edges_by_x.keys()) > 2:
-        x = min(edges_by_x.keys())
-        next_x = min(e_x for e_x in edges_by_x.keys() if e_x != x)
-        print(f"     {sorted(edges_by_x[x])=}")
-        print(f"{sorted(edges_by_x[next_x])=}")
-        print(f"                       {dig=}")
-        if len(edges_by_x[x]) % 2 != 0:
-            raise ValueError(f"Should have an even number of coordinates on each x, not so: {edges_by_x[x]}")
-        for start_edge, end_edge in batched(sorted(edges_by_x[x]), 2):
-            dig += (end_edge.y - start_edge.y + 1) * (next_x - x)
+    while len(dig.xs_remaining) > 1:
+        dig.reduce()
+        dig.print()
 
-            next_start_edge = Coords(next_x, start_edge.y)
-            if next_start_edge in edges_by_x[next_x]:
-                edges_by_x[next_x].remove(next_start_edge)
-            else:
-                edges_by_x[next_x].add(next_start_edge)
-
-            next_end_edge = Coords(next_x, end_edge.y)
-            if next_end_edge in edges_by_x[next_x]:
-                edges_by_x[next_x].remove(next_end_edge)
-            else:
-                edges_by_x[next_x].add(next_end_edge)
-
-            next_ys = list(sorted(edge.y for edge in edges_by_x[next_x]))
-
-            for start_y, end_y in batched(next_ys[1:-1], 2):
-                if start_y > start_edge.y and end_y < end_edge.y:
-                    dig += end_y - start_y - 1
-
-        del edges_by_x[x]
-    print(f"{dig=}")
-    print(f"{edges_by_x=}")
-    if any(len(ys) % 2 != 0 for ys in edges_by_x.values()):
-        raise ValueError("Invalid end situation, should have exactly an even amount of values that form one or more rectangles")
-    x = min(edges_by_x.keys())
-    next_x = min(e_x for e_x in edges_by_x.keys() if e_x != x)
-    ys = {c.y for edges in edges_by_x.values() for c in edges}
-    if any(len(ys) != len(vs) for vs in edges_by_x.values()):
-        raise ValueError("Remaining two columns coordinates do not have equal y values")
-    for start_y, end_y in batched(sorted(ys), 2):
-        dig += (next_x - x + 1) * (end_y - start_y + 1)
-        print(f"{dig=} after {next_x=}, {x=}, {end_y=}, {start_y=}")
-
-    return dig
+    return dig.dig_size
 
 
 @register_solver(year="2023", key="18", variation="a")
