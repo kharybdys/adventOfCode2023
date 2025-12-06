@@ -1,5 +1,6 @@
 import sys
 from collections import namedtuple, deque
+from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
@@ -178,6 +179,9 @@ class Grid(Generic[T]):
         self.height = len(tiles)
         self.width = len(tiles[0])
 
+    def copy(self) -> Self:
+        return self.__class__(deepcopy(self.tiles))
+
     @staticmethod
     def from_size(width: int, height: int, tile: T) -> Self:
         return Grid(tiles=[[tile for _ in range(width)] for _ in range(height)])
@@ -224,18 +228,18 @@ class Grid(Generic[T]):
         for y in range(0, self.height):
             print("".join(print_function(x, y, tile) for x, tile in enumerate(self.tiles[y])))
 
-    def all_coords_for(self, value: T) -> Generator[tuple[int, int], None, None]:
+    def all_coords_for(self, values: set[T]) -> Generator[tuple[int, int], None, None]:
         for x, y, tile in self.coords_iterator:
-            if tile == value:
+            if tile in values:
                 yield x, y
 
 
 def shortest_path_analysis(grid: Grid[T], start_tile: T, wall_tile: T) -> dict[Coords, int]:
     visited: dict[Coords, int] = {}
-    for start_coords in grid.all_coords_for(start_tile):
+    for start_coords in grid.all_coords_for({start_tile}):
         visited[start_coords] = 0
     boundary: deque[Coords] = deque()
-    boundary.extend(grid.all_coords_for(start_tile))
+    boundary.extend(grid.all_coords_for({start_tile}))
     while boundary:
         coords = boundary.pop()
         for direction in Direction.all():

@@ -30,7 +30,7 @@ def generate_all_coords_within_cheat_distance(
 
 
 def find_all_cheats(grid: TileGrid, max_cheat_distance: int) -> Generator[int, None, None]:
-    end_coords = list(grid.all_coords_for(TileStatus.END))
+    end_coords = list(grid.all_coords_for({TileStatus.END}))
     if len(end_coords) != 1:
         raise ValueError("More than one end tile in the grid")
 

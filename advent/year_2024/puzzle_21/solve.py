@@ -146,7 +146,7 @@ class PathAttempt:
 @cache
 def find_smallest_path(keypad: TileGrid, from_tile: TileStatus, to_tile: TileStatus, expansion_depth: int) -> int:
     smallest_path: PathAttempt | None = None
-    start_coords = list(keypad.all_coords_for(from_tile))
+    start_coords = list(keypad.all_coords_for({from_tile}))
     if len(start_coords) != 1:
         raise ValueError(f"Invalid keypad, need unique coords for {from_tile}")
     start_coords = Coords(*start_coords[0])
