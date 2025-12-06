@@ -4,6 +4,8 @@
 venv
 
 # Don't version control puzzle inputs, Advent of Code doesn't like that
+/data/vierkant/*
+!/data/vierkant/.gitkeep
 /data/2021/*
 !/data/2021/.gitkeep
 /data/2022/*
@@ -12,3 +14,5 @@ venv
 !/data/2023/.gitkeep
 /data/2024/*
 !/data/2024/.gitkeep
+/data/2025/*
+!/data/2025/.gitkeep
