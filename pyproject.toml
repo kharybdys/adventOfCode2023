@@ -1,0 +1,13 @@
+[project]
+name = "Advent_of_Code_by_Kharybdys"
+description = "Advent of Code by Kharybdys"
+version = "0.0.1"
+requires-python = ">= 3.12"
+
+[build-system]
+requires = ["uv_build >= 0.9.11, <0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = ""
+module-name = "advent"
