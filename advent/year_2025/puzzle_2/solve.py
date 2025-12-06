@@ -1,0 +1,42 @@
+import re
+from collections.abc import Generator
+
+from advent.registry import register_solver
+
+ID_RANGE_PATTERN = re.compile(r"(?P<id_start>\d+)-(?P<id_end>\d+)")
+
+
+def invalid_id(id_to_check: int) -> bool:
+    id_str = str(id_to_check)
+    if len(id_str) % 2 != 0:
+        return False
+    halfway = len(id_str) // 2
+    return id_str[0:halfway] == id_str[halfway:]
+
+
+def generate_ids(line: str) -> Generator[int, None, None]:
+    for id_range in line.split(","):
+        match = ID_RANGE_PATTERN.fullmatch(id_range)
+        id_end = int(match.group("id_end"))
+        id_start = int(match.group("id_start"))
+        for id_to_check in range(id_start, id_end + 1):
+            yield id_to_check
+
+
+@register_solver(year="2025", key="2", variation="a")
+def solve_a(puzzle_input: list[str], example: bool) -> None:
+    solution = 0
+    if len(puzzle_input) != 1:
+        raise ValueError("Puzzle input for 2025, 2 is expected to be a single line")
+
+    for id_to_check in generate_ids(puzzle_input[0]):
+        if invalid_id(id_to_check):
+            solution += id_to_check
+
+    print(f"Solution is {solution}")
+
+
+@register_solver(year="2025", key="2", variation="b")
+def solve_b(puzzle_input: list[str], example: bool) -> None:
+
+    print(f"Solution is TBD")
