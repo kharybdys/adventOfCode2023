@@ -39,4 +39,21 @@ def solve_a(puzzle_input: list[str], example: bool) -> None:
 
 @register_solver(year="2025", key="4", variation="b")
 def solve_b(puzzle_input: list[str], example: bool) -> None:
-    print(f"Solution is TBD")
+    print(puzzle_input)
+    grid: TileGrid = Grid.from_lines(puzzle_input, TileStatus.from_char)
+    solution = 0
+    paper_removed = True
+
+    while paper_removed:
+        paper_removed = False
+        for x, y in grid.all_coords_for({TileStatus.PAPER}):
+            paper_neighbours = 0
+            for neighbour in generate_eight_neighbours(Coords(x=x, y=y)):
+                if grid.value_at_or(neighbour.x, neighbour.y, default=TileStatus.EMPTY) == TileStatus.PAPER:
+                    paper_neighbours += 1
+            if paper_neighbours < 4:
+                solution += 1
+                grid.set_value_at(x, y, TileStatus.EMPTY)
+                paper_removed = True
+
+    print(f"Solution is {solution}")
