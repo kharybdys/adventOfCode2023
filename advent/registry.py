@@ -18,9 +18,7 @@ def register_solver(year: str, key: str, variation: str):
     return _decorate
 
 
-def get_solver(year: str, key: str, variation: str, debug: bool = False) -> SolverFunction:
-    if debug:
-        print(_REGISTERED_SOLVERS)
+def get_solver(year: str, key: str, variation: str) -> SolverFunction:
     solver = _REGISTERED_SOLVERS.get(year, {}).get(key, {}).get(variation, None)
     return solver
 
