@@ -4,9 +4,9 @@ from pathlib import Path
 from registry import get_solver, import_all_solvers
 
 # I intend to manually change this for every puzzle
-DEFAULT_YEAR = "2024"
+DEFAULT_YEAR = "2025"
 DEFAULT_PUZZLE = "1"
-DEFAULT_VARIATION = "b"
+DEFAULT_VARIATION = "a"
 EXAMPLE = False
 
 
@@ -21,7 +21,7 @@ def load_input(year: str, key: str) -> list[str]:
 def main():
     import_all_solvers()
 
-    parser = ArgumentParser(prog="AdventOfCode2023_solver")
+    parser = ArgumentParser(prog="AdventOfCode_solver")
     parser.add_argument("-y", "--year", default=DEFAULT_YEAR)
     parser.add_argument("-p", "--puzzle", default=DEFAULT_PUZZLE)
     parser.add_argument("-v", "--variation", default=DEFAULT_VARIATION)
