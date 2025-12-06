@@ -14,29 +14,42 @@ def line_to_positions_dict(line: str) -> dict[int, list[int]]:
     return result
 
 
-def calculate_max_joltage(line: str) -> int:
+def find_current_best_joltage(
+    line: str,
+) -> tuple[int, int]:
     line_to_positions = line_to_positions_dict(line)
-    first_digit = max(line_to_positions.keys())
-    first_digit_position = min(line_to_positions[first_digit])
-    # Ugly but works
-    if first_digit_position == len(line) - 1:
-        first_digit = max(key for key in line_to_positions.keys() if key != first_digit)
-        first_digit_position = min(line_to_positions[first_digit])
+    best_joltage = max(line_to_positions.keys())
+    position = min(line_to_positions[best_joltage])
+    return best_joltage, position
 
-    second_digit = max(key for key, positions in line_to_positions.items() if positions[0] > first_digit_position)
 
-    return first_digit * 10 + second_digit
+def calculate_max_joltage(line: str, joltage_length: int) -> int:
+    min_position = 0
+    result = 0
+    line_len = len(line)
+    for remaining in sorted(range(0, joltage_length), reverse=True):
+        joltage, joltage_position = find_current_best_joltage(
+            line[min_position:line_len - remaining],
+        )
+        min_position += joltage_position + 1
+        result = result * 10 + joltage
+
+    return result
 
 
 @register_solver(year="2025", key="3", variation="a")
 def solve_a(puzzle_input: list[str], example: bool) -> None:
     solution = 0
     for line in puzzle_input:
-        solution += calculate_max_joltage(line)
+        solution += calculate_max_joltage(line, joltage_length=2)
 
     print(f"Solution is {solution}")
 
 
 @register_solver(year="2025", key="3", variation="b")
 def solve_b(puzzle_input: list[str], example: bool) -> None:
-    print(f"Solution is TBD")
+    solution = 0
+    for line in puzzle_input:
+        solution += calculate_max_joltage(line, joltage_length=12)
+
+    print(f"Solution is {solution}")
