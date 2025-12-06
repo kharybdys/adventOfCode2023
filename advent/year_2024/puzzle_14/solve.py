@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Self, ClassVar
 
-from registry import register_solver
+from advent.registry import register_solver
 
 Coords = namedtuple("Coords", ["x", "y"])
 

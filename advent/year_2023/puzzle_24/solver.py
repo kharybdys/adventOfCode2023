@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from itertools import combinations
 from typing import Self, ClassVar
 
-from registry import register_solver
+from advent.registry import register_solver
 from advent.utils.range import Range
 
 

@@ -1,4 +1,4 @@
-from registry import register_solver
+from advent.registry import register_solver
 
 
 def calculate_previous_element(elements: list[int]) -> int:

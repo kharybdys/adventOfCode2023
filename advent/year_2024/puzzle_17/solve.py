@@ -2,7 +2,7 @@ import re
 from collections.abc import Generator
 from enum import Enum
 
-from registry import register_solver
+from advent.registry import register_solver
 from advent.utils.solver import split_in_groups_separated_by_empty_line
 
 

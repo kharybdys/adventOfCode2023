@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from queue import PriorityQueue
 from typing import Self
 
-from registry import register_solver
+from advent.registry import register_solver
 
 
 @dataclass(order=True)

@@ -3,7 +3,7 @@ from collections import defaultdict
 from typing import Generator
 
 from advent.year_2023.puzzle_12.nonogram import to_nonogram_pattern, NonogramPattern
-from registry import register_solver
+from advent.registry import register_solver
 
 
 def extend_unknown_to_part_cache(max_length: int):

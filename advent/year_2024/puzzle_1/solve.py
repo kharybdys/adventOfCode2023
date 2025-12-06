@@ -1,7 +1,7 @@
 import re
 from collections import Counter
 
-from registry import register_solver
+from advent.registry import register_solver
 
 PATTERN = re.compile(r"\D+")
 

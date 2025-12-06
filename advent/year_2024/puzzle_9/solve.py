@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Self
 
-from registry import register_solver
+from advent.registry import register_solver
 
 
 def get_file_id(index: int) -> int:

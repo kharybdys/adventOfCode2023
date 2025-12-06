@@ -3,7 +3,7 @@ from functools import cached_property, cache
 from queue import PriorityQueue
 from typing import Self
 
-from registry import register_solver
+from advent.registry import register_solver
 from advent.utils.enums import Direction
 from advent.utils.grid import Grid
 

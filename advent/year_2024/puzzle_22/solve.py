@@ -1,7 +1,7 @@
 from collections import deque, defaultdict
 from collections.abc import Generator
 
-from registry import register_solver
+from advent.registry import register_solver
 
 
 def mix_and_prune(secret: int, step: int) -> int:

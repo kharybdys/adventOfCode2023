@@ -1,5 +1,5 @@
 from advent.earlier_years.puzzle2022_25.base import SNAFUNumber
-from registry import register_solver
+from advent.registry import register_solver
 
 
 @register_solver(year="2022", key="25", variation="a")

@@ -7,7 +7,7 @@ from itertools import combinations
 from typing import Generator, Self
 
 from advent.utils.graph import Vertex, Edge, print_graph
-from registry import register_solver
+from advent.registry import register_solver
 
 
 def parse(puzzle_input: list[str]) -> list[Vertex]:

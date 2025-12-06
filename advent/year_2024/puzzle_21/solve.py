@@ -4,7 +4,7 @@ from collections.abc import Generator
 from dataclasses import dataclass
 from functools import cache, cached_property
 
-from registry import register_solver
+from advent.registry import register_solver
 from advent.utils.enums import PrintEnum, Direction
 from advent.utils.grid import Grid, Coords
 

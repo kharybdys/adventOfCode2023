@@ -1,6 +1,6 @@
 from math import prod, isqrt, comb
 
-from registry import register_solver
+from advent.registry import register_solver
 
 
 def inverse_choose(result: int, choices: int) -> int:

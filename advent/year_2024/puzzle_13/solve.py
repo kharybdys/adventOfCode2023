@@ -3,7 +3,7 @@ from collections import namedtuple
 from dataclasses import dataclass
 from typing import Self, ClassVar
 
-from registry import register_solver
+from advent.registry import register_solver
 from advent.utils.solver import split_in_groups_separated_by_empty_line
 
 Coords = namedtuple("Coords", ["x", "y"])

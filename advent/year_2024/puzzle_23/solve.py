@@ -2,7 +2,7 @@ from collections.abc import Generator
 from itertools import combinations
 from typing import Self
 
-from registry import register_solver
+from advent.registry import register_solver
 
 
 class Vertex:

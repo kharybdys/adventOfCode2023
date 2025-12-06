@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Generator
 
 from advent.earlier_years.puzzle2021_25.sea_floor import SeaFloor
-from registry import register_solver
+from advent.registry import register_solver
 
 
 def read_expected_output_for_example() -> Generator[tuple[int, SeaFloor], None, None]:

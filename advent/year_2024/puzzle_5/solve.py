@@ -3,7 +3,7 @@ from collections import defaultdict
 from collections.abc import Generator
 from itertools import filterfalse
 
-from registry import register_solver
+from advent.registry import register_solver
 from advent.utils.solver import split_in_groups_separated_by_empty_line
 
 # key needs to be before any of the set

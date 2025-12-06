@@ -4,7 +4,7 @@ from functools import reduce
 
 from advent.year_2023.puzzle_8.analyzer import AnalyzedNode
 from advent.year_2023.puzzle_8.instructor import InstructedNode, instruct_nodes
-from registry import register_solver
+from advent.registry import register_solver
 from advent.utils.all_equal import all_equal
 
 

@@ -1,6 +1,6 @@
 from advent.year_2023.puzzle_20.cycle_analyzer import analyze
 from advent.year_2023.puzzle_20.modules import Module, parse_module, OutputModule, Pulse, WatcherModule, send_pulse
-from registry import register_solver
+from advent.registry import register_solver
 
 DEBUG = False
 

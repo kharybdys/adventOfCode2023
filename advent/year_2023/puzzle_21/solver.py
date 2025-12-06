@@ -3,7 +3,7 @@ from collections import namedtuple, defaultdict
 from dataclasses import dataclass
 from typing import Generator
 
-from registry import register_solver
+from advent.registry import register_solver
 from advent.utils.enums import PrintEnum, Direction
 from advent.utils.grid import Grid
 

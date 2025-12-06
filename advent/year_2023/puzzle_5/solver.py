@@ -1,5 +1,5 @@
 from advent.year_2023.puzzle_5.base import ProblemA, ProblemB
-from registry import register_solver
+from advent.registry import register_solver
 
 
 @register_solver(year="2023", key="5", variation="a")

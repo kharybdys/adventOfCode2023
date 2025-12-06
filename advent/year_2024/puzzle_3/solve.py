@@ -2,7 +2,7 @@ import re
 from collections.abc import Generator
 from itertools import chain, starmap
 
-from registry import register_solver
+from advent.registry import register_solver
 
 SIMPLE_PATTERN = re.compile(r"mul\((\d+)\s*,\s*(\d+)\)")
 DO_PATTERN_STRING = r"(?P<do>do\(\))"

@@ -1,7 +1,7 @@
 import re
 from typing import Generator
 
-from registry import register_solver
+from advent.registry import register_solver
 
 PATTERN = re.compile(r"\d|(one)|(two)|(three)|(four)|(five)|(six)|(seven)|(eight)|(nine)")
 

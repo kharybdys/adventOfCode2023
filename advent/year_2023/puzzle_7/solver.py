@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from enum import IntEnum
 from typing import ClassVar, Self
 
-from registry import register_solver
+from advent.registry import register_solver
 
 
 class HandType(IntEnum):

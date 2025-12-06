@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import Generator, Self
 
 from advent.earlier_years.puzzle2021_24.alu import analyze_instructions, PartialALU
-from registry import register_solver
+from advent.registry import register_solver
 
 
 @dataclass

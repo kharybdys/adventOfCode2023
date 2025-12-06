@@ -1,6 +1,6 @@
 import re
 
-from registry import register_solver
+from advent.registry import register_solver
 
 
 def my_hash(string: str) -> int:

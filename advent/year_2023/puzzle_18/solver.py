@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from itertools import batched, starmap
 from typing import Generator
 
-from registry import register_solver
+from advent.registry import register_solver
 from advent.utils.range import InclusiveRange
 from advent.utils.enums import Direction
 from advent.utils.grid import Grid, Coords

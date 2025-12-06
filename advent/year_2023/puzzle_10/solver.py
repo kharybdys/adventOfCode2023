@@ -2,7 +2,7 @@ from collections import deque
 from dataclasses import dataclass
 
 from advent.year_2023.puzzle_10.board import Board
-from registry import register_solver
+from advent.registry import register_solver
 from advent.utils.enums import Direction
 
 

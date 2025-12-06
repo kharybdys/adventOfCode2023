@@ -1,6 +1,6 @@
 from collections.abc import Generator
 
-from registry import register_solver
+from advent.registry import register_solver
 from advent.utils.enums import PrintEnum, Direction
 from advent.utils.grid import Grid, shortest_path_analysis, Coords
 

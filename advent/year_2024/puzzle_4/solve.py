@@ -1,4 +1,4 @@
-from registry import register_solver
+from advent.registry import register_solver
 from advent.utils.enums import PrintEnum
 from advent.utils.grid import Grid
 

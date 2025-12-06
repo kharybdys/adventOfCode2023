@@ -3,7 +3,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import ClassVar, Self
 
-from registry import register_solver
+from advent.registry import register_solver
 
 
 @dataclass

@@ -1,7 +1,7 @@
 from typing import Generator
 
 from advent.year_2023.puzzle_16.mirrors_and_splitters import TileStatus, generate_beams_by_coords, Beam
-from registry import register_solver
+from advent.registry import register_solver
 from advent.utils.enums import Direction
 from advent.utils.grid import Grid
 

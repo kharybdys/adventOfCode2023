@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from itertools import combinations
 from typing import Generator, Iterable, Self
 
-from registry import register_solver
+from advent.registry import register_solver
 
 
 @dataclass

@@ -1,5 +1,5 @@
 from advent.year_2023.puzzle_2.base import Game
-from registry import register_solver
+from advent.registry import register_solver
 
 SACK_CONTENTS_A = {"red": 12, "green": 13, "blue": 14}
 

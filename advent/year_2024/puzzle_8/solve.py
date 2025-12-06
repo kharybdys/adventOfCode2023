@@ -3,7 +3,7 @@ from collections.abc import Generator
 from itertools import combinations
 
 from advent.year_2024.puzzle_8.tile import TileGrid, TileStatus
-from registry import register_solver
+from advent.registry import register_solver
 from advent.utils.grid import Grid
 
 

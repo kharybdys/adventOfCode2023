@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from functools import cached_property
 from typing import Generator, Self, ClassVar
 
-from registry import register_solver
+from advent.registry import register_solver
 
 DEBUG = False
 

@@ -4,7 +4,7 @@ from pathlib import Path
 from advent.earlier_years.puzzle2022_11.logger import LogStreamer
 from advent.earlier_years.puzzle2022_11.monkey import Monkey, WorrisomeMonkey
 from advent.earlier_years.puzzle2022_11.parser import parse_puzzle_lines
-from registry import register_solver
+from advent.registry import register_solver
 
 
 def expected_output(example: bool, postfix: str = "") -> list[str]:
