@@ -1,4 +1,4 @@
-from puzzle8.node import Node
+from advent.year_2023.puzzle_8.node import Node
 
 
 class InstructedNode(Node):

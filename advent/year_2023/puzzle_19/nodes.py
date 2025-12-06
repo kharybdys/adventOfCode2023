@@ -2,7 +2,7 @@ import re
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from puzzle19.base import Part, Watcher, PartRange
+from advent.year_2023.puzzle_19.base import Part, Watcher, PartRange
 
 
 class Node(ABC):

@@ -1,4 +1,3 @@
-import math
 import re
 from collections.abc import Generator
 from enum import Enum

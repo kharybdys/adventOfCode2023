@@ -4,7 +4,7 @@ from collections import deque, defaultdict
 from dataclasses import field, dataclass
 from typing import Generator
 
-from puzzle8.node import Node
+from advent.year_2023.puzzle_8.node import Node
 
 
 @dataclass
