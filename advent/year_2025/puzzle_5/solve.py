@@ -39,4 +39,23 @@ def solve_a(puzzle_input: list[str], example: bool) -> None:
 
 @register_solver(year="2025", key="5", variation="b")
 def solve_b(puzzle_input: list[str], example: bool) -> None:
-    print(f"Solution is TBD")
+    solution = 0
+
+    input_generator = split_in_groups_separated_by_empty_line(puzzle_input)
+    fresh_ranges = list(sorted(parse_fresh_ranges(next(input_generator)), key=lambda r: (r.start, r.stop)))
+
+    range_generator = iter(fresh_ranges)
+    current_range = next(range_generator)
+    next_range = next(range_generator, None)
+
+    while current_range is not None:
+        while next_range is not None and current_range.within(next_range.start):
+            if next_range.stop > current_range.stop:
+                current_range.stop = next_range.stop
+            next_range = next(range_generator, None)
+
+        solution += current_range.size
+        current_range = next_range
+        next_range = next(range_generator, None)
+
+    print(f"Solution is {solution}")
