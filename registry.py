@@ -4,7 +4,7 @@ from collections import defaultdict
 from types import ModuleType
 
 import advent
-from utils import SolverFunction
+from advent.utils.solver import SolverFunction
 
 _REGISTERED_SOLVERS: dict[str, dict[str, dict[str, SolverFunction]]] = defaultdict(lambda: defaultdict(dict))
 
@@ -18,7 +18,9 @@ def register_solver(year: str, key: str, variation: str):
     return _decorate
 
 
-def get_solver(year: str, key: str, variation: str) -> SolverFunction:
+def get_solver(year: str, key: str, variation: str, debug: bool = False) -> SolverFunction:
+    if debug:
+        print(_REGISTERED_SOLVERS)
     solver = _REGISTERED_SOLVERS.get(year, {}).get(key, {}).get(variation, None)
     return solver
 
@@ -31,6 +33,8 @@ def _import_submodules(package: str | ModuleType, recursive=True) -> dict[str, M
     results = {}
     for loader, name, is_pkg in pkgutil.walk_packages(package.__path__):
         full_name = package.__name__ + '.' + name
+        if full_name in results:
+            continue
         try:
             results[full_name] = importlib.import_module(full_name)
         except ModuleNotFoundError:

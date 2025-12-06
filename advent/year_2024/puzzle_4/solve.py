@@ -1,5 +1,6 @@
 from registry import register_solver
-from utils import PrintEnum, Grid
+from advent.utils.enums import PrintEnum
+from advent.utils.grid import Grid
 
 
 class TileStatus(PrintEnum):

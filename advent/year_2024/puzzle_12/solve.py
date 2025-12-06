@@ -5,7 +5,8 @@ from functools import cached_property
 from itertools import pairwise, starmap
 
 from registry import register_solver
-from utils import PrintEnum, Grid, Direction
+from advent.utils.enums import PrintEnum, Direction
+from advent.utils.grid import Grid
 
 
 class TileStatus(PrintEnum):

@@ -2,7 +2,8 @@ from collections import defaultdict
 from collections.abc import Generator
 
 from registry import register_solver
-from utils import PrintEnum, Grid, Direction
+from advent.utils.enums import PrintEnum, Direction
+from advent.utils.grid import Grid
 
 
 class TileStatus(PrintEnum):

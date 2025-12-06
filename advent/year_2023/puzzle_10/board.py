@@ -2,7 +2,7 @@ from collections import Counter
 from functools import cache, cached_property
 from typing import Self, Generator
 
-from utils import Direction, PrintEnum
+from advent.utils.enums import PrintEnum, Direction
 
 DEBUG = False
 

@@ -1,5 +1,5 @@
 from registry import register_solver
-from utils import split_in_groups_separated_by_empty_line
+from advent.utils.solver import split_in_groups_separated_by_empty_line
 
 
 def validate_mirror_after(lines: list[str], mirror_after: int, expected_diffs: int) -> bool:

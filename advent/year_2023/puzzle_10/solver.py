@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from advent.year_2023.puzzle_10.board import Board
 from registry import register_solver
-from utils import Direction
+from advent.utils.enums import Direction
 
 
 @dataclass

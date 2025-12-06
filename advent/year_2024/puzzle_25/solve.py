@@ -3,7 +3,7 @@ from itertools import starmap
 from typing import Self
 
 from registry import register_solver
-from utils import split_in_groups_separated_by_empty_line
+from advent.utils.solver import split_in_groups_separated_by_empty_line
 
 
 @dataclass

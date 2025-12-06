@@ -4,7 +4,7 @@ from itertools import combinations
 
 from advent.year_2024.puzzle_8.tile import TileGrid, TileStatus
 from registry import register_solver
-from utils import Grid
+from advent.utils.grid import Grid
 
 
 def analyze(grid: TileGrid) -> dict[TileStatus, list[tuple[int, int]]]:

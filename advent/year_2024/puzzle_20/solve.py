@@ -1,7 +1,8 @@
 from collections.abc import Generator
 
 from registry import register_solver
-from utils import Grid, PrintEnum, Coords, shortest_path_analysis, Direction
+from advent.utils.enums import PrintEnum, Direction
+from advent.utils.grid import Grid, shortest_path_analysis, Coords
 
 
 class TileStatus(PrintEnum):

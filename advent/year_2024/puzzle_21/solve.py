@@ -5,7 +5,8 @@ from dataclasses import dataclass
 from functools import cache, cached_property
 
 from registry import register_solver
-from utils import Grid, PrintEnum, Direction, Coords
+from advent.utils.enums import PrintEnum, Direction
+from advent.utils.grid import Grid, Coords
 
 
 class TileStatus(PrintEnum):

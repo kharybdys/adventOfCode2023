@@ -4,7 +4,8 @@ from typing import Generator
 from advent.year_2023.puzzle_19.base import Watcher, Part, PartRange
 from advent.year_2023.puzzle_19.nodes import Node, LinkToTreeNode, parse_node
 from registry import register_solver
-from utils import split_in_groups_separated_by_empty_line, Range
+from advent.utils.solver import split_in_groups_separated_by_empty_line
+from advent.utils.range import Range
 
 
 def parse_nodes(lines: list[str], watcher: Watcher) -> Node:

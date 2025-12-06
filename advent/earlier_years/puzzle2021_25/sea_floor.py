@@ -1,6 +1,6 @@
 from typing import Optional, Self
 
-from utils import PrintEnum
+from advent.utils.enums import PrintEnum
 
 
 class FloorStatus(PrintEnum):

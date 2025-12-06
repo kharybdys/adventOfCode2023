@@ -3,7 +3,7 @@ from collections import deque
 from dataclasses import dataclass
 from typing import Self, Generator
 
-from utils import Range
+from advent.utils.range import Range
 
 
 @dataclass

@@ -2,7 +2,7 @@ from enum import Enum
 from itertools import starmap
 from typing import Generator, Self
 
-from utils import Direction
+from advent.utils.enums import Direction
 
 
 class RockStatus(Enum):

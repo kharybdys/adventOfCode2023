@@ -1,7 +1,8 @@
 from collections import deque, defaultdict
 from dataclasses import dataclass
 
-from utils import Direction, Grid, PrintEnum
+from advent.utils.enums import PrintEnum, Direction
+from advent.utils.grid import Grid
 
 DEBUG = False
 

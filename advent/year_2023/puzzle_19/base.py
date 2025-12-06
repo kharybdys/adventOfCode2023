@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Self, Optional
 
-from utils import Range
+from advent.utils.range import Range
 
 
 class Status(Enum):

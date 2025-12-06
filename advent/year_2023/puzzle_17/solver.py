@@ -4,7 +4,8 @@ from queue import PriorityQueue
 from typing import Self
 
 from registry import register_solver
-from utils import Direction, Grid
+from advent.utils.enums import Direction
+from advent.utils.grid import Grid
 
 IntGrid = Grid[int]
 

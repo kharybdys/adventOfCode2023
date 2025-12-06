@@ -5,7 +5,7 @@ from itertools import combinations
 from typing import Self, ClassVar
 
 from registry import register_solver
-from utils import Range
+from advent.utils.range import Range
 
 
 @dataclass(eq=True)

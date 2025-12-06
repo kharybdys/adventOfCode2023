@@ -5,7 +5,7 @@ from functools import cached_property
 from itertools import combinations
 
 from advent.year_2023.puzzle_20.modules import Module, ConjunctionModule, send_pulse, Pulse, WatcherModule
-from utils import Range
+from advent.utils.range import Range
 
 
 @dataclass

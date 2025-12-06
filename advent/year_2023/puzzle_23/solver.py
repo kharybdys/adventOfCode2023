@@ -1,9 +1,10 @@
 from collections import deque
 from typing import Generator, Callable
 
-from graph.base import Vertex, VertexPath, print_graph
+from advent.utils.graph import Vertex, VertexPath, print_graph
 from registry import register_solver
-from utils import Grid, PrintEnum, Direction, T
+from advent.utils.enums import PrintEnum, Direction
+from advent.utils.grid import Grid, T
 
 DEBUG = False
 

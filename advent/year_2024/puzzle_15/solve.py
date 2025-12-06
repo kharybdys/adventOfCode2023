@@ -3,7 +3,9 @@ from collections.abc import Generator
 from itertools import chain
 
 from registry import register_solver
-from utils import PrintEnum, Grid, Direction, split_in_groups_separated_by_empty_line
+from advent.utils.solver import split_in_groups_separated_by_empty_line
+from advent.utils.enums import PrintEnum, Direction
+from advent.utils.grid import Grid
 
 
 class TileStatus(PrintEnum):

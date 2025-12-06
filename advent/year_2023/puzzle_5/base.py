@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from itertools import batched
 from typing import Self, Generator
 
-from utils import split_in_groups_separated_by_empty_line
+from advent.utils.solver import split_in_groups_separated_by_empty_line
 
 
 @dataclass(order=True)

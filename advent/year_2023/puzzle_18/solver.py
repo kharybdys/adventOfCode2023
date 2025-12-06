@@ -6,7 +6,9 @@ from itertools import batched, starmap
 from typing import Generator
 
 from registry import register_solver
-from utils import Direction, Grid, Coords, InclusiveRange
+from advent.utils.range import InclusiveRange
+from advent.utils.enums import Direction
+from advent.utils.grid import Grid, Coords
 
 DEBUG = False
 

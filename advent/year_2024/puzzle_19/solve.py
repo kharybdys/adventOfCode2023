@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from functools import cache
 
 from registry import register_solver
-from utils import split_in_groups_separated_by_empty_line
+from advent.utils.solver import split_in_groups_separated_by_empty_line
 
 
 def extract_towels(lines: list[str]) -> tuple[str]:

@@ -6,7 +6,7 @@ from functools import cached_property
 from itertools import combinations
 from typing import Generator, Self
 
-from graph.base import Vertex, Edge, print_graph
+from advent.utils.graph import Vertex, Edge, print_graph
 from registry import register_solver
 
 
