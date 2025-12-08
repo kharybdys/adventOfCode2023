@@ -52,6 +52,26 @@ class Circuit(list[Connection]):
         return connection.from_str in juncs and connection.to_str in juncs
 
 
+def process_connection(circuits: list[Circuit], connection: Connection):
+    """ Will edit circuits in place """
+    matching_circuits = [circuit for circuit in circuits if circuit.is_connected(connection)]
+    if len(matching_circuits) == 2:
+        # need to merge circuits
+        circuits.remove(matching_circuits[0])
+        other_circuit = matching_circuits[1]
+        other_circuit.append(connection)
+        other_circuit.extend(matching_circuits[0])
+    elif len(matching_circuits) == 1:
+        if not matching_circuits[0].is_contained(connection):
+            matching_circuits[0].append(connection)
+    elif len(matching_circuits) == 0:
+        new_circuit = Circuit()
+        new_circuit.append(connection)
+        circuits.append(new_circuit)
+    else:
+        raise ValueError(f"For {connection=}, got an unexpected number of {matching_circuits=}")
+
+
 @register_solver(year="2025", key="8", variation="a")
 def solve_a(puzzle_input: list[str], example: bool) -> None:
     connections: list[Connection] = []
@@ -61,28 +81,9 @@ def solve_a(puzzle_input: list[str], example: bool) -> None:
     connections.sort(key=lambda c: c.distance)
 
     circuits: list[Circuit] = []
-    for index in range(0, 10 if example else 1000):
-        current_connection = connections[index]
-        print(f"Finding a home for {current_connection}, with distance {current_connection.distance}")
-        matching_circuits = [circuit for circuit in circuits if circuit.is_connected(current_connection)]
-        if len(matching_circuits) == 2:
-            # need to merge circuits
-            circuits.remove(matching_circuits[0])
-            other_circuit = matching_circuits[1]
-            other_circuit.append(current_connection)
-            other_circuit.extend(matching_circuits[0])
-        elif len(matching_circuits) == 1:
-            if not matching_circuits[0].is_contained(current_connection):
-                matching_circuits[0].append(current_connection)
-        elif len(matching_circuits) == 0:
-            new_circuit = Circuit()
-            new_circuit.append(current_connection)
-            circuits.append(new_circuit)
-        else:
-            raise ValueError(f"For {current_connection=}, got an unexpected number of {matching_circuits=}")
-
-    for circuit in circuits:
-        print(f"{circuit=}, {circuit.junction_count=}")
+    for _ in range(0, 10 if example else 1000):
+        current_connection = connections.pop(0)
+        process_connection(circuits, current_connection)
 
     solution = prod(sorted((circuit.junction_count for circuit in circuits), reverse=True)[0:3])
     print(f"Solution is {solution}")
