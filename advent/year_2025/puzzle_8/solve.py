@@ -91,5 +91,17 @@ def solve_a(puzzle_input: list[str], example: bool) -> None:
 
 @register_solver(year="2025", key="8", variation="b")
 def solve_b(puzzle_input: list[str], example: bool) -> None:
-    solution = 0
+    connections: list[Connection] = []
+    for line_1, line_2 in combinations(puzzle_input, 2):
+        connections.append(Connection(from_str=line_1, to_str=line_2))
+
+    connections.sort(key=lambda c: c.distance)
+
+    junction_count = len(puzzle_input)
+    circuits: list[Circuit] = []
+    while len(circuits) != 1 or sum(circuit.junction_count for circuit in circuits) != junction_count:
+        current_connection = connections.pop(0)
+        process_connection(circuits, current_connection)
+
+    solution = current_connection._from_x * current_connection._to_x
     print(f"Solution is {solution}")
