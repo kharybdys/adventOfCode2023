@@ -1,5 +1,6 @@
+from collections import deque
 from dataclasses import dataclass, field
-from typing import Self
+from typing import Self, Callable, Generator
 
 
 class Vertex:
@@ -70,3 +71,16 @@ def print_graph(vertices: list[Vertex]):
     for vertex in vertices:
         edge_info = ", ".join(f"{edge.start_vertex.ident if edge.end_vertex == vertex else edge.end_vertex.ident}: {edge.weight}" for edge in vertex.edges)
         print(f"{vertex.ident}: {edge_info}")
+
+
+def find_all_paths(start_path: VertexPath, path_finished_function: Callable[[VertexPath], bool]) -> Generator[VertexPath, None, None]:
+    paths: deque[VertexPath] = deque()
+    paths.append(start_path)
+    while paths:
+        path = paths.pop()
+        if path_finished_function(path):
+            print(f"Found path with length {path.length}")
+            yield path
+        for edge in path.current_vertex.edges:
+            if edge.end_vertex not in path.visited:
+                paths.append(path.move_to(edge.end_vertex))

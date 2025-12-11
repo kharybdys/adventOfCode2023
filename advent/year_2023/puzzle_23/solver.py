@@ -1,7 +1,7 @@
-from collections import deque
-from typing import Generator, Callable
+from functools import partial
+from typing import Callable
 
-from advent.utils.graph import Vertex, VertexPath, print_graph
+from advent.utils.graph import Vertex, VertexPath, print_graph, find_all_paths
 from advent.registry import register_solver
 from advent.utils.enums import PrintEnum, Direction
 from advent.utils.grid import Grid, T
@@ -113,18 +113,8 @@ def generate_graph(start_vertex: Vertex, grid: TileGrid) -> list[Vertex]:
     return list(vertices.values())
 
 
-def find_all_paths(start_path: VertexPath, target_y: int) -> Generator[VertexPath, None, None]:
-    paths: deque[VertexPath] = deque()
-    paths.append(start_path)
-    while paths:
-        path = paths.pop()
-        if path.current_vertex.coords[1] == target_y:
-            if DEBUG:
-                print(f"Found path with length {path.length}")
-            yield path
-        for edge in path.current_vertex.edges:
-            if edge.end_vertex not in path.visited:
-                paths.append(path.move_to(edge.end_vertex))
+def path_finished(path: VertexPath, target_y: int) -> bool:
+    return path.current_vertex.coords[1] == target_y
 
 
 def solve_for_grid(grid: TileGrid) -> int:
@@ -136,7 +126,13 @@ def solve_for_grid(grid: TileGrid) -> int:
     vertices = generate_graph(start_vertex, grid)
     print(f"Graph generated, {vertices}")
     print_graph(vertices)
-    solution = max(find_all_paths(VertexPath(current_vertex=start_vertex), target_y=grid.height - 1), key=lambda p: p.length)
+    solution = max(
+        find_all_paths(
+            start_path=VertexPath(current_vertex=start_vertex),
+            path_finished_function=partial(path_finished, target_y=grid.height - 1),
+        ),
+        key=lambda p: p.length,
+    )
     return solution.length
 
 
