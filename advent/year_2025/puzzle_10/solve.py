@@ -7,32 +7,33 @@ from advent.registry import register_solver
 
 
 class Lights:
-    def __init__(self, target: str, lights: list[int] | None = None, presses: int | None = None):
-        self.target = target
+    def __init__(self, target_lights: str, status: list[int] | None = None, presses: int | None = None):
+        self.target = target_lights
         self.presses = presses or 0
-        if lights:
-            self._lights = lights
+        if status:
+            self._status = status
         else:
-            self._lights = [0 for _ in range(len(target))]
+            self._status = [0 for _ in range(len(target_lights))]
 
     def switch(self, light_numbers: list[int]):
         for light_number in light_numbers:
-            self._lights[light_number] += 1
+            self._status[light_number] += 1
         self.presses += 1
 
     @property
     def lights(self) -> list[bool]:
-        return [light % 2 == 1 for light in self._lights]
+        return [light % 2 == 1 for light in self._status]
 
-    def __repr__(self) -> str:
+    @property
+    def lights_str(self) -> str:
         return "".join("#" if light else "." for light in self.lights)
 
     @property
-    def done(self) -> bool:
-        return self.target == repr(self)
+    def done_lights(self) -> bool:
+        return self.target == self.lights_str
 
     def __copy__(self) -> Self:
-        return self.__class__(self.target, self._lights, self.presses)
+        return self.__class__(self.target, self._status, self.presses)
 
 
 INPUT_PATTERN = re.compile(r"\[(?P<target>[.#]+)\]\s*\((?P<buttons>.*)\)\s*\{(?P<joltages>[\d,]+)\}")
@@ -47,22 +48,22 @@ def parse_input_line(line: str) -> tuple[Lights, list[list[int]], list[int]]:
     return lights, buttons, joltages
 
 
-def solve_line(line: str) -> int:
+def solve_line_for_lights(line: str) -> int:
     print(f"Solving {line}")
     seen_stages: set[str] = set()
     lights, buttons, joltages = parse_input_line(line)
     attempts: deque[Lights] = deque()
     current_attempt = lights
-    seen_stages.add(repr(current_attempt))
-    while current_attempt and not current_attempt.done:
+    seen_stages.add(current_attempt.lights_str)
+    while current_attempt and not current_attempt.done_lights:
         print(f"{current_attempt=}, {current_attempt.presses=}, {seen_stages=}")
         for button in buttons:
             print(f"Applying {button}")
             new_attempt = deepcopy(current_attempt)
             new_attempt.switch(button)
-            if not repr(new_attempt) in seen_stages:
+            if new_attempt.lights_str not in seen_stages:
                 print(f"Adding {new_attempt=} coming from {current_attempt=} with {button}")
-                seen_stages.add(repr(new_attempt))
+                seen_stages.add(new_attempt.lights_str)
                 # Breadth-first search, so appendleft
                 attempts.appendleft(new_attempt)
         current_attempt = attempts.pop() if len(attempts) > 0 else None
@@ -73,7 +74,7 @@ def solve_line(line: str) -> int:
 def solve_a(puzzle_input: list[str], example: bool) -> None:
     solution = 0
     for line in puzzle_input:
-        solution += solve_line(line)
+        solution += solve_line_for_lights(line)
     print(f"Solution is {solution}")
 
 
