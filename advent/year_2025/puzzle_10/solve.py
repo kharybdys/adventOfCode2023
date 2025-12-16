@@ -63,18 +63,18 @@ class Joltages(Lights):
         return f"Joltages[target={self.target}, joltages={self.joltages}, buttons={self.buttons}, presses={self.presses}, status={self.status}]"
 
     @property
-    def smallest_remaining_index(self) -> int | None:
-        """ Index with the least amount of presses to go. """
-        min_index, min_presses = min(
-            ((index, joltage - status) for index, (status, joltage) in enumerate(zip(self.status, self.joltages, strict=True)) if joltage > status),
-            key=lambda t: t[1],
-            default=None,
-        )
+    def next_index_to_clear(self) -> int | None:
+        """ Index with the least amount of buttons left referring it. """
+        min_index, button_count = min(((index, sum(1 for button in self.buttons if index in button)) for index in self.remaining_indices), key=lambda t: t[1], default=None)
         return min_index
 
     @property
+    def remaining_joltages(self) -> tuple[int]:
+        return tuple(joltage - status for status, joltage in zip(self.status, self.joltages, strict=True))
+
+    @property
     def remaining_indices(self) -> tuple[int]:
-        return tuple(index for index, joltage in enumerate(self.joltages) if self.status[index] < joltage)
+        return tuple(index for index, joltage in enumerate(self.remaining_joltages) if joltage > 0)
 
     @property
     def joltages_tuple(self) -> tuple[int]:
@@ -86,7 +86,13 @@ class Joltages(Lights):
 
     @property
     def invalid_joltages(self) -> bool:
-        return any(status > joltage for status, joltage in zip(self.status, self.joltages, strict=True))
+        if any(joltage < 0 for joltage in self.remaining_joltages):
+            return True
+        for index in self.remaining_indices:
+            if not any(button for button in self.buttons if index in button):
+                return True
+
+        return False
 
     @classmethod
     def from_lights(cls, lights: Lights, target_joltages: list[int], buttons: set[tuple[int]]):
@@ -137,14 +143,14 @@ def solve_line_for_lights(line: str) -> int:
     return current_attempt.presses
 
 
-def generate_splits(total: int, amount: int) -> Generator[tuple[int, ...], None, None]:
-    if amount <= 0:
-        raise ValueError(f"Invalid amount, got {total=}, {amount=}")
-    elif amount == 1:
+def generate_splits(total: int, limits: list[int]) -> Generator[tuple[int, ...], None, None]:
+    if len(limits) <= 0:
+        raise ValueError(f"Invalid limits, got {total=}, {limits=}")
+    elif len(limits) == 1:
         yield total,
     else:
         for i in range(0, total + 1):
-            for split in generate_splits(total=total - i, amount=amount - 1):
+            for split in generate_splits(total=total - i, limits=limits[1:]):
                 yield tuple([i] + list(split))
 
 
@@ -159,15 +165,20 @@ def solve_line_for_joltages(line: str) -> int:
     while current_attempt:
         print(f"{current_attempt=}")
 
-        smallest_remaining_index = current_attempt.smallest_remaining_index
-        if smallest_remaining_index is None:
+        next_index_to_clear = current_attempt.next_index_to_clear
+        if next_index_to_clear is None:
             raise ValueError(f"Got no buttons remaining for {current_attempt=}")
-        print(f"Going to process all buttons referring {smallest_remaining_index}")
+        print(f"Going to process all buttons referring {next_index_to_clear}")
 
-        buttons_with_index = {button for button in current_attempt.buttons if smallest_remaining_index in button}
-        remaining_presses = current_attempt.joltages[smallest_remaining_index] - current_attempt.status[smallest_remaining_index]
+        remaining_presses = current_attempt.joltages[next_index_to_clear] - current_attempt.status[next_index_to_clear]
+        buttons_with_index = {
+            button: max((current_attempt.remaining_joltages[index] for index in button if index != next_index_to_clear), default=remaining_presses)
+            for button
+            in current_attempt.buttons
+            if next_index_to_clear in button
+        }
         if len(buttons_with_index) > 0:
-            for split in generate_splits(total=remaining_presses, amount=len(buttons_with_index)):
+            for split in generate_splits(total=remaining_presses, limits=list(buttons_with_index.values())):
                 new_attempt = deepcopy(current_attempt)
                 for button, presses in zip(buttons_with_index, split):
                     new_attempt.switch(button, times=presses)
